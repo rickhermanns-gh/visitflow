@@ -392,7 +392,14 @@
       </div>
     </div>
     <div class="content">
-      <div class="greeting">Goedemorgen 👋</div>
+      <div class="greeting" id="greeting-text"></div>
+      <script>
+        (function() {
+          const h = new Date().getHours();
+          const greet = h < 12 ? 'Goedemorgen 🌅' : h < 18 ? 'Goedemiddag ☀️' : 'Goedenavond 🌙';
+          document.getElementById('greeting-text').textContent = greet;
+        })();
+      </script>
       <div class="greeting-sub">Hier is je bezoekactiviteit overzicht</div>
       <div class="stat-grid">
         <div class="stat-card">
