@@ -1,89 +1,2455 @@
-.mobile-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 200; background: var(--blue-dark); border-top: 1px solid rgba(255,255,255,0.08); padding: 8px 0 max(8px, env(safe-area-inset-bottom)); grid-template-columns: repeat(4, 1fr); } .mobile-nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; color: rgba(255,255,255,0.5); font-size: 10px; font-weight: 600; cursor: pointer; padding: 4px 0; transition: color 0.15s; text-transform: uppercase; letter-spacing: 0.5px; } .mobile-nav-item svg { width: 22px; height: 22px; } .mobile-nav-item.active { color: white; } .mobile-nav-item.active svg { stroke: white; } /* ── HAMBURGER BUTTON ── */ .hamburger { display: none; background: none; border: none; cursor: pointer; padding: 4px; color: var(--grey-800); } .hamburger svg { width: 22px; height: 22px; } /* ── SIDEBAR OVERLAY ── */ .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 99; opacity: 0; transition: opacity 0.25s; } .sidebar-overlay.open { opacity: 1; } @media (max-width: 768px) { /* Hide desktop sidebar, show mobile nav */ .sidebar { transform: translateX(-100%); z-index: 150; transition: transform 0.3s; } .sidebar.open { transform: translateX(0); } .sidebar-overlay { display: block; pointer-events: none; } .sidebar-overlay.open { pointer-events: auto; } .hamburger { display: flex; } .mobile-nav { display: grid; } /* Main fills full width, add bottom padding for nav */ .main { margin-left: 0 !important; padding-bottom: 80px; } /* Topbar adjustments */ .topbar { padding: 0 16px; } .topbar-title { font-size: 15px; } /* Content padding */ .content { padding: 16px; } /* Stat grid: 1 column on small screens */ .stat-grid { grid-template-columns: 1fr; gap: 10px; margin-bottom: 16px; } /* Grid-2 stacks vertically */ .grid-2 { grid-template-columns: 1fr; gap: 14px; } /* Form grid: 1 column */ .form-grid { grid-template-columns: 1fr; } .form-group.full { grid-column: 1; } /* Template & action grids: 1 column */ .template-grid, .action-grid { grid-template-columns: 1fr; } /* Wizard content full width */ .content[style*="max-width"] { max-width: 100% !important; } /* Wizard steps: smaller */ .wizard-steps { gap: 0; margin-bottom: 20px; } .step-label { font-size: 10px; } .step-num { width: 24px; height: 24px; font-size: 11px; } /* Record button slightly smaller */ .record-btn { width: 90px; height: 90px; } .record-btn svg { width: 32px; height: 32px; } .record-timer { font-size: 28px; } /* Cal suggestion padding */ .cal-suggestion { padding: 14px 16px; } /* Instruction banner: 1 column */ .instruction-grid { grid-template-columns: 1fr !important; } /* Modal full width on mobile */ .cal-modal { width: 95vw; } /* Buttons smaller on mobile */ .btn { padding: 8px 14px; font-size: 12px; } } @media (max-width: 400px) { .stat-grid { gap: 8px; } .content { padding: 12px; } }
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VisitFlow — Smart Debrief Tool</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue: #204C8D;
+    --blue-light: #2E6BC4;
+    --blue-pale: #E8EEF7;
+    --blue-dark: #162F56;
+    --amber: #F59E0B;
+    --amber-pale: #FEF3C7;
+    --green: #10B981;
+    --green-pale: #D1FAE5;
+    --red: #EF4444;
+    --grey-50: #F9FAFB;
+    --grey-100: #F3F4F6;
+    --grey-200: #E5E7EB;
+    --grey-400: #9CA3AF;
+    --grey-600: #4B5563;
+    --grey-800: #1F2937;
+    --white: #FFFFFF;
+    --sidebar-w: 240px;
+    --radius: 10px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.04);
+    --shadow-lg: 0 10px 15px rgba(0,0,0,0.08), 0 4px 6px rgba(0,0,0,0.04);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--grey-50); color: var(--grey-800); display: flex; min-height: 100vh; }
 
-VisitFlow
-Smart Debrief Tool
-MENU
+  /* SIDEBAR */
+  .sidebar {
+    width: var(--sidebar-w); background: var(--blue-dark); position: fixed; top: 0; left: 0; height: 100vh;
+    display: flex; flex-direction: column; z-index: 100; transition: transform 0.3s;
+  }
+  .sidebar-logo { padding: 24px 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .logo-mark { display: flex; align-items: center; gap: 10px; }
+  .logo-icon { width: 34px; height: 34px; background: var(--blue-light); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+  .logo-icon svg { width: 18px; height: 18px; fill: white; }
+  .logo-text { font-size: 17px; font-weight: 700; color: white; letter-spacing: -0.3px; }
+  .logo-sub { font-size: 10px; color: rgba(255,255,255,0.4); font-weight: 400; margin-top: 1px; }
+  .sidebar-nav { padding: 16px 12px; flex: 1; }
+  .nav-label { font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 1px; padding: 0 8px; margin-bottom: 6px; margin-top: 16px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 7px;
+    color: rgba(255,255,255,0.6); font-size: 14px; font-weight: 500; cursor: pointer;
+    transition: all 0.15s; margin-bottom: 2px; text-decoration: none;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.07); color: white; }
+  .nav-item.active { background: var(--blue-light); color: white; }
+  .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+  .nav-badge { margin-left: auto; background: var(--amber); color: white; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 10px; }
+  .sidebar-footer { padding: 16px 12px; border-top: 1px solid rgba(255,255,255,0.08); }
+  .user-card { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 7px; }
+  .user-avatar { width: 32px; height: 32px; background: var(--blue-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: white; flex-shrink: 0; }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 13px; font-weight: 600; color: white; }
+  .user-role { font-size: 11px; color: rgba(255,255,255,0.4); }
 
-Dashboard
+  /* MAIN */
+  .main { margin-left: var(--sidebar-w); flex: 1; min-height: 100vh; }
+  .topbar { background: white; border-bottom: 1px solid var(--grey-200); padding: 0 28px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+  .topbar-title { font-size: 16px; font-weight: 700; color: var(--grey-800); }
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+  .btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; font-family: inherit; }
+  .btn-primary { background: var(--blue); color: white; }
+  .btn-primary:hover { background: var(--blue-light); }
+  .btn-secondary { background: var(--grey-100); color: var(--grey-800); }
+  .btn-secondary:hover { background: var(--grey-200); }
+  .btn-ghost { background: transparent; color: var(--grey-600); border: 1px solid var(--grey-200); }
+  .btn-ghost:hover { background: var(--grey-50); }
+  .btn-green { background: var(--green); color: white; }
+  .btn-green:hover { background: #059669; }
+  .btn-amber { background: var(--amber); color: white; }
+  .btn svg { width: 15px; height: 15px; }
+  .content { padding: 28px; }
 
-Nieuw Bezoek
+  /* CARDS & STAT */
+  .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+  .stat-card { background: white; border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); border: 1px solid var(--grey-200); }
+  .stat-label { font-size: 12px; font-weight: 500; color: var(--grey-400); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .stat-label svg { width: 14px; height: 14px; }
+  .stat-value { font-size: 32px; font-weight: 700; color: var(--grey-800); line-height: 1; }
+  .stat-sub { font-size: 11px; color: var(--grey-400); margin-top: 4px; }
 
-Rapporten
-7
-BEHEER
+  .card { background: white; border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--grey-200); }
+  .card-header { padding: 18px 20px 14px; border-bottom: 1px solid var(--grey-100); display: flex; align-items: center; justify-content: space-between; }
+  .card-title { font-size: 14px; font-weight: 700; color: var(--grey-800); }
+  .card-body { padding: 0; }
 
-Templates & Instellingen
-RH
-Rick Hermanns
-Fleet Sales DACH
+  /* VISITS LIST */
+  .visit-item { padding: 16px 20px; border-bottom: 1px solid var(--grey-100); display: flex; align-items: center; gap: 14px; cursor: pointer; transition: background 0.1s; }
+  .visit-item:hover { background: var(--grey-50); }
+  .visit-item:last-child { border-bottom: none; }
+  .visit-avatar { width: 38px; height: 38px; border-radius: 9px; background: var(--blue-pale); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: var(--blue); flex-shrink: 0; }
+  .visit-info { flex: 1; min-width: 0; }
+  .visit-company { font-size: 14px; font-weight: 600; color: var(--grey-800); }
+  .visit-meta { font-size: 12px; color: var(--grey-400); margin-top: 2px; }
+  .visit-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .badge-green { background: var(--green-pale); color: #065F46; }
+  .badge-blue { background: var(--blue-pale); color: var(--blue); }
+  .badge-amber { background: var(--amber-pale); color: #92400E; }
+  .badge-grey { background: var(--grey-100); color: var(--grey-600); }
+  .tag { display: inline-flex; padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 600; background: var(--grey-100); color: var(--grey-600); margin-right: 4px; }
 
-Nieuw Bezoek
-Annuleren
-1
-Setup
+  /* PAGES */
+  .page { display: none; }
+  .page.active { display: block; }
 
-2
-Debrief
+  /* NEW VISIT WIZARD */
+  .wizard-steps { display: flex; align-items: center; gap: 0; margin-bottom: 28px; }
+  .step { display: flex; align-items: center; gap: 8px; flex: 1; }
+  .step-num { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; transition: all 0.2s; }
+  .step.done .step-num { background: var(--green); color: white; }
+  .step.active .step-num { background: var(--blue); color: white; }
+  .step.pending .step-num { background: var(--grey-200); color: var(--grey-400); }
+  .step-label { font-size: 12px; font-weight: 600; color: var(--grey-400); }
+  .step.active .step-label { color: var(--blue); }
+  .step.done .step-label { color: var(--green); }
+  .step-line { flex: 1; height: 2px; background: var(--grey-200); margin: 0 8px; }
+  .step-line.done { background: var(--green); }
 
-3
-Review
+  /* FORM */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1 / -1; }
+  label { font-size: 12px; font-weight: 600; color: var(--grey-600); }
+  input, select, textarea {
+    padding: 9px 12px; border: 1.5px solid var(--grey-200); border-radius: 8px;
+    font-size: 14px; font-family: inherit; color: var(--grey-800); background: white;
+    transition: border-color 0.15s; outline: none;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(32,76,141,0.08); }
+  textarea { resize: vertical; min-height: 80px; }
 
-4
-Acties
+  /* TEMPLATE CARDS */
+  .template-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .template-card {
+    border: 2px solid var(--grey-200); border-radius: var(--radius); padding: 16px; cursor: pointer;
+    transition: all 0.15s; position: relative;
+  }
+  .template-card:hover { border-color: var(--blue-light); background: var(--blue-pale); }
+  .template-card.selected { border-color: var(--blue); background: var(--blue-pale); }
+  .template-card-check { position: absolute; top: 12px; right: 12px; width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--grey-300); display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+  .template-card.selected .template-card-check { background: var(--blue); border-color: var(--blue); }
+  .template-card.selected .template-card-check::after { content: '✓'; color: white; font-size: 11px; font-weight: 700; }
+  .template-card-name { font-size: 14px; font-weight: 700; color: var(--grey-800); margin-bottom: 4px; padding-right: 24px; }
+  .template-card-dest { font-size: 11px; color: var(--grey-400); }
+  .template-card-fields { font-size: 11px; color: var(--blue); font-weight: 600; margin-top: 8px; }
 
-Zo werkt VisitFlow — 4 stappen
-1
-Setup
-Selecteer je afspraak uit de agenda of vul het bedrijf en contactpersoon in
-2
-Debrief
-Spreek je notities in — VisitFlow transcribeert en structureert automatisch
-3
-Review
-Controleer en vul het gegenereerde rapport aan waar nodig
-4
-Acties
-Sla op, stuur naar CRM of deel het rapport — klaar in minder dan 3 minuten
+  /* VOICE RECORDER */
+  .recorder-wrap { display: flex; flex-direction: column; align-items: center; padding: 48px 24px; }
+  .record-btn {
+    width: 110px; height: 110px; border-radius: 50%; background: var(--blue); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 0 rgba(32,76,141,0.3);
+    transition: all 0.2s; position: relative;
+  }
+  .record-btn:hover { background: var(--blue-light); transform: scale(1.04); }
+  .record-btn.recording { background: var(--red); animation: pulse 1.5s infinite; }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
+    70% { box-shadow: 0 0 0 20px rgba(239,68,68,0); }
+    100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+  }
+  .record-btn svg { width: 40px; height: 40px; fill: white; }
+  .record-timer { font-family: 'DM Mono', monospace; font-size: 36px; font-weight: 500; color: var(--grey-800); margin: 24px 0 8px; }
+  .record-status { font-size: 14px; color: var(--grey-400); margin-bottom: 32px; }
+  .transcript-box { background: var(--grey-50); border: 1px solid var(--grey-200); border-radius: var(--radius); padding: 16px; width: 100%; font-size: 13px; color: var(--grey-600); line-height: 1.6; }
+  .processing-overlay { display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 40px; }
+  .spinner { width: 40px; height: 40px; border: 3px solid var(--grey-200); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .processing-steps { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 300px; }
+  .processing-step { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--grey-400); }
+  .processing-step.done { color: var(--green); }
+  .processing-step.active { color: var(--blue); font-weight: 600; }
 
-MEEST RECENTE AFSPRAAK UIT JE AGENDA
-14:30
-Vr 20 feb
-Eurofleet Solutions BV — Wagenpark gesprek
+  /* REVIEW TABS */
+  .tab-bar { display: flex; gap: 4px; border-bottom: 2px solid var(--grey-200); margin-bottom: 20px; }
+  .tab { padding: 10px 16px; font-size: 13px; font-weight: 600; color: var(--grey-400); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.15s; }
+  .tab:hover { color: var(--grey-600); }
+  .tab.active { color: var(--blue); border-bottom-color: var(--blue); }
 
- Marcus Weber  · 
+  /* FIELD REVIEW */
+  .needs-input { background: var(--amber-pale); border: 1px solid #FDE68A; border-radius: var(--radius); padding: 14px 16px; margin-bottom: 20px; }
+  .needs-input-header { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: #92400E; margin-bottom: 12px; cursor: pointer; }
+  .needs-input-header svg { width: 16px; height: 16px; }
+  .field-row { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+  .field-label { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: var(--grey-600); }
+  .voice-badge { display: inline-flex; align-items: center; gap: 3px; padding: 2px 6px; background: var(--green-pale); color: #065F46; border-radius: 4px; font-size: 10px; font-weight: 700; }
+  .amber-field input, .amber-field select { border-color: var(--amber) !important; background: var(--amber-pale); }
+  .section-title { font-size: 13px; font-weight: 700; color: var(--blue); margin: 20px 0 12px; padding-bottom: 6px; border-bottom: 2px solid var(--blue-pale); }
 
- Amsterdam HQ  · 
+  /* NEXT ACTIONS */
+  .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .action-card {
+    border: 2px solid var(--grey-200); border-radius: var(--radius); padding: 16px; cursor: pointer;
+    transition: all 0.15s; display: flex; gap: 12px; align-items: flex-start;
+  }
+  .action-card:hover { border-color: var(--blue-light); }
+  .action-card.selected { border-color: var(--blue); background: var(--blue-pale); }
+  .action-icon { width: 36px; height: 36px; border-radius: 8px; background: var(--blue-pale); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .action-icon svg { width: 18px; height: 18px; stroke: var(--blue); fill: none; stroke-width: 2; }
+  .action-label { font-size: 13px; font-weight: 600; color: var(--grey-800); }
+  .action-desc { font-size: 11px; color: var(--grey-400); margin-top: 2px; }
+  .action-extra { margin-top: 10px; display: none; }
+  .action-card.selected .action-extra { display: block; }
 
- 1u
-✓ Gebruik deze afspraak
-↕ Andere afspraak kiezen
-Bezoekgegevens
-Bedrijfsnaam *
+  /* DASHBOARD TASKS */
+  .task-item { padding: 14px 20px; border-bottom: 1px solid var(--grey-100); display: flex; align-items: center; gap: 12px; }
+  .task-item:last-child { border-bottom: none; }
+  .task-check { width: 18px; height: 18px; border: 2px solid var(--grey-300); border-radius: 4px; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+  .task-check:hover { border-color: var(--blue); }
+  .task-text { flex: 1; font-size: 13px; color: var(--grey-800); }
+  .task-due { font-size: 11px; color: var(--grey-400); }
+  .task-company { font-size: 11px; color: var(--blue); font-weight: 600; }
 
-Contactpersoon *
+  /* SETTINGS */
+  .settings-section { margin-bottom: 28px; }
+  .settings-title { font-size: 14px; font-weight: 700; color: var(--grey-800); margin-bottom: 14px; }
+  .settings-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: white; border: 1px solid var(--grey-200); border-radius: var(--radius); margin-bottom: 8px; }
+  .settings-row-info { flex: 1; }
+  .settings-row-name { font-size: 13px; font-weight: 600; color: var(--grey-800); }
+  .settings-row-sub { font-size: 11px; color: var(--grey-400); margin-top: 2px; }
+  .toggle { width: 44px; height: 24px; background: var(--grey-200); border-radius: 12px; cursor: pointer; position: relative; transition: background 0.2s; flex-shrink: 0; }
+  .toggle.on { background: var(--blue); }
+  .toggle::after { content: ''; position: absolute; width: 18px; height: 18px; background: white; border-radius: 50%; top: 3px; left: 3px; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+  .toggle.on::after { transform: translateX(20px); }
 
-Datum
-Locatie
+  /* SEARCH */
+  .search-bar { display: flex; align-items: center; gap: 10px; padding: 9px 14px; background: white; border: 1.5px solid var(--grey-200); border-radius: 8px; margin-bottom: 16px; }
+  .search-bar svg { width: 15px; height: 15px; stroke: var(--grey-400); flex-shrink: 0; }
+  .search-bar input { border: none; outline: none; font-size: 13px; color: var(--grey-800); flex: 1; padding: 0; background: transparent; }
 
-Extra aanwezigen
+  /* LINKEDIN BTN */
+  .linkedin-btn { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; background: #0A66C2; color: white; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; border: none; font-family: inherit; text-decoration: none; }
+  .linkedin-btn svg { width: 13px; height: 13px; fill: white; }
 
-Selecteer rapport-templates
-Minimaal 1 vereist
-Wagenpark Mobility Scan
-📧 Klant + CRM
-32 velden · 5 secties · PDF
-Intern Bezoekrapport
-🏢 Intern · SharePoint
-18 velden · 3 secties · DOCX
-Merk A Rapportage
-🏷️ Brand portal
-24 velden · 4 secties · PDF
-Klantensamenvatting
-📧 Klant
-12 velden · 2 secties · PDF
-Start Debrief →
+  /* UTILS */
+  .flex { display: flex; }
+  .flex-col { flex-direction: column; }
+  .gap-2 { gap: 8px; }
+  .gap-3 { gap: 12px; }
+  .gap-4 { gap: 16px; }
+  .mt-4 { margin-top: 16px; }
+  .mt-6 { margin-top: 24px; }
+  .mb-4 { margin-bottom: 16px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .text-sm { font-size: 13px; }
+  .text-xs { font-size: 11px; }
+  .text-muted { color: var(--grey-400); }
+  .font-bold { font-weight: 700; }
+  .greeting { font-size: 22px; font-weight: 700; color: var(--grey-800); margin-bottom: 4px; }
+  .greeting-sub { font-size: 14px; color: var(--grey-400); margin-bottom: 24px; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .divider { height: 1px; background: var(--grey-100); margin: 20px 0; }
+  .empty-state { padding: 40px; text-align: center; color: var(--grey-400); font-size: 13px; }
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--grey-800); color: white; padding: 12px 18px; border-radius: 10px; font-size: 13px; font-weight: 500; box-shadow: var(--shadow-lg); z-index: 999; display: none; animation: slideUp 0.3s; }
+  @keyframes slideUp { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .pill { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; background: var(--grey-100); color: var(--grey-600); }
+  .pill.blue { background: var(--blue-pale); color: var(--blue); }
+  hr { border: none; border-top: 1px solid var(--grey-100); }
 
-Dashboard
-Nieuw
-Rapporten
-Instellingen
+  /* CALENDAR PICKER */
+  .cal-suggestion {
+    background: linear-gradient(135deg, var(--blue-dark) 0%, var(--blue) 100%);
+    border-radius: var(--radius); padding: 18px 20px; margin-bottom: 16px;
+    position: relative; overflow: hidden;
+  }
+  .cal-suggestion::before {
+    content: ''; position: absolute; top: -30px; right: -30px;
+    width: 120px; height: 120px; border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+  }
+  .cal-suggestion-label {
+    font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.5);
+    text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .cal-suggestion-label svg { width: 12px; height: 12px; stroke: rgba(255,255,255,0.5); }
+  .cal-event {
+    display: flex; align-items: center; gap: 14px;
+  }
+  .cal-event-time {
+    background: rgba(255,255,255,0.12); border-radius: 8px; padding: 8px 12px;
+    text-align: center; flex-shrink: 0; min-width: 56px;
+  }
+  .cal-event-time-hour { font-size: 16px; font-weight: 700; color: white; line-height: 1; }
+  .cal-event-time-ampm { font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 2px; }
+  .cal-event-info { flex: 1; }
+  .cal-event-title { font-size: 15px; font-weight: 700; color: white; margin-bottom: 3px; }
+  .cal-event-meta { font-size: 12px; color: rgba(255,255,255,0.6); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .cal-event-meta span { display: flex; align-items: center; gap: 4px; }
+  .cal-event-meta svg { width: 11px; height: 11px; stroke: rgba(255,255,255,0.5); }
+  .cal-actions { display: flex; gap: 8px; margin-top: 14px; }
+  .btn-cal-use { background: white; color: var(--blue); font-size: 12px; font-weight: 700; padding: 7px 14px; border-radius: 7px; border: none; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+  .btn-cal-use:hover { background: var(--blue-pale); }
+  .btn-cal-other { background: rgba(255,255,255,0.12); color: white; font-size: 12px; font-weight: 600; padding: 7px 14px; border-radius: 7px; border: none; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+  .btn-cal-other:hover { background: rgba(255,255,255,0.2); }
+
+  /* CALENDAR PICKER MODAL */
+  .cal-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; display: none; align-items: center; justify-content: center; }
+  .cal-modal-overlay.open { display: flex; }
+  .cal-modal { background: white; border-radius: 14px; width: 480px; max-width: 95vw; box-shadow: var(--shadow-lg); overflow: hidden; }
+  .cal-modal-header { padding: 18px 20px 14px; border-bottom: 1px solid var(--grey-100); display: flex; align-items: center; justify-content: space-between; }
+  .cal-modal-title { font-size: 15px; font-weight: 700; color: var(--grey-800); }
+  .cal-modal-close { background: var(--grey-100); border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; color: var(--grey-600); }
+  .cal-list { max-height: 380px; overflow-y: auto; }
+  .cal-list-item {
+    padding: 14px 20px; border-bottom: 1px solid var(--grey-100); cursor: pointer;
+    display: flex; align-items: center; gap: 14px; transition: background 0.1s;
+  }
+  .cal-list-item:hover { background: var(--grey-50); }
+  .cal-list-item.suggested { background: var(--blue-pale); border-left: 3px solid var(--blue); }
+  .cal-list-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .cal-list-dot.blue { background: var(--blue); }
+  .cal-list-dot.green { background: var(--green); }
+  .cal-list-dot.amber { background: var(--amber); }
+  .cal-list-time { font-size: 11px; font-weight: 700; color: var(--grey-400); width: 44px; flex-shrink: 0; font-family: 'DM Mono', monospace; }
+  .cal-list-info { flex: 1; }
+  .cal-list-title { font-size: 13px; font-weight: 600; color: var(--grey-800); }
+  .cal-list-sub { font-size: 11px; color: var(--grey-400); margin-top: 2px; }
+  .cal-list-badge { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 10px; }
+  .cal-section-label { padding: 10px 20px 6px; font-size: 10px; font-weight: 700; color: var(--grey-400); text-transform: uppercase; letter-spacing: 1px; background: var(--grey-50); border-bottom: 1px solid var(--grey-100); }
+  /* ── CALENDAR SLOTS ── */
+  .slot-loading { font-size:12px; color:var(--grey-400); padding:8px 0; }
+  .slot-day-header { font-size:11px; font-weight:700; color:var(--grey-500); text-transform:uppercase; letter-spacing:0.7px; margin:10px 0 6px; }
+  .slot-grid { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:4px; }
+  .slot-btn {
+    padding:6px 12px; border-radius:8px; border:1.5px solid var(--grey-200);
+    background:white; font-size:12px; font-weight:600; color:var(--grey-700);
+    cursor:pointer; transition:all 0.15s;
+  }
+  .slot-btn:hover { border-color:var(--blue); color:var(--blue); background:var(--blue-pale); }
+  .slot-btn.busy { background:var(--grey-100); color:var(--grey-400); border-color:var(--grey-100); cursor:not-allowed; text-decoration:line-through; font-weight:400; }
+  .slot-btn.selected { background:var(--blue); border-color:var(--blue); color:white; }
+  .slot-week-nav { display:flex; align-items:center; gap:8px; margin-bottom:12px; }
+  .slot-week-nav button { background:none; border:1.5px solid var(--grey-200); border-radius:6px; padding:4px 10px; font-size:12px; cursor:pointer; color:var(--grey-700); }
+  .slot-week-nav button:hover { border-color:var(--blue); color:var(--blue); }
+  .slot-week-label { font-size:12px; font-weight:700; color:var(--grey-800); flex:1; text-align:center; }
+  .selected-slot { background:var(--blue-pale); border:1.5px solid var(--blue); border-radius:8px; padding:8px 12px; font-size:12px; font-weight:600; color:var(--blue); margin-bottom:8px; }
+
+  /* ── CONTENT LIBRARY ── */
+  .content-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px; border-radius: 8px;
+    border: 1.5px solid var(--grey-200); background: white;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .content-item:hover { border-color: var(--blue); background: var(--blue-pale); }
+  .content-item input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--blue); flex-shrink: 0; cursor: pointer; }
+  .content-item-icon { font-size: 18px; flex-shrink: 0; }
+  .content-item-title { font-size: 12px; font-weight: 700; color: var(--grey-800); }
+  .content-item-meta { font-size: 11px; color: var(--grey-500); margin-top: 1px; }
+  .content-item:has(input:checked) { border-color: var(--blue); background: var(--blue-pale); }
+
+  /* ── FORMAT CHIPS & SEND ROWS ── */
+  .format-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 6px 12px; border-radius: 20px;
+    border: 1.5px solid var(--grey-200);
+    background: white; color: var(--grey-600);
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    transition: all 0.15s; user-select: none;
+  }
+  .format-chip:hover { border-color: var(--blue); color: var(--blue); }
+  .format-chip.selected { background: var(--blue-pale); border-color: var(--blue); color: var(--blue); }
+
+  .send-row {
+    border: 1.5px solid var(--grey-200); border-radius: 10px;
+    overflow: hidden; transition: border-color 0.15s;
+  }
+  .send-row.active { border-color: var(--blue); }
+  .send-row-toggle {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px; cursor: pointer; background: white;
+  }
+  .send-row-toggle:hover { background: var(--blue-pale); }
+  .send-row-check {
+    width: 18px; height: 18px; border-radius: 50%;
+    border: 2px solid var(--grey-300); flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .send-row.active .send-row-check {
+    background: var(--blue); border-color: var(--blue);
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+    background-size: 10px; background-repeat: no-repeat; background-position: center;
+  }
+  .send-row-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .send-row-label { font-size: 13px; font-weight: 700; color: var(--grey-800); }
+  .send-row-sub { font-size: 11px; color: var(--grey-500); }
+  .send-row-detail { padding: 0 14px 14px 56px; background: var(--blue-pale); border-top: 1px solid var(--grey-100); }
+
+  /* ── KEYWORD CHIPS ── */
+  .kw-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 6px 12px; border-radius: 20px;
+    border: 1.5px solid var(--grey-200);
+    background: white; color: var(--grey-700);
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    transition: all 0.15s; user-select: none;
+  }
+  .kw-chip:hover { border-color: var(--blue); color: var(--blue); }
+  .kw-chip.done {
+    background: #e8f5e9; border-color: #4caf50;
+    color: #2e7d32; text-decoration: line-through;
+  }
+  .kw-chip.done::before { content: '✓ '; font-weight: 800; }
+
+</style>
+  .mobile-nav {
+    display: none;
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+    background: var(--blue-dark);
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .mobile-nav-item {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    color: rgba(255,255,255,0.5); font-size: 10px; font-weight: 600;
+    cursor: pointer; padding: 4px 0; transition: color 0.15s;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .mobile-nav-item svg { width: 22px; height: 22px; }
+  .mobile-nav-item.active { color: white; }
+  .mobile-nav-item.active svg { stroke: white; }
+
+  /* ── HAMBURGER BUTTON ── */
+  .hamburger { display: none; background: none; border: none; cursor: pointer; padding: 4px; color: var(--grey-800); }
+  .hamburger svg { width: 22px; height: 22px; }
+
+  /* ── SIDEBAR OVERLAY ── */
+  .sidebar-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+    z-index: 99; opacity: 0; transition: opacity 0.25s;
+  }
+  .sidebar-overlay.open { opacity: 1; }
+
+  @media (max-width: 768px) {
+    /* Hide desktop sidebar, show mobile nav */
+    .sidebar { transform: translateX(-100%); z-index: 150; transition: transform 0.3s; }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-overlay { display: block; pointer-events: none; }
+    .sidebar-overlay.open { pointer-events: auto; }
+    .hamburger { display: flex; }
+    .mobile-nav { display: grid; }
+
+    /* Main fills full width, add bottom padding for nav */
+    .main { margin-left: 0 !important; padding-bottom: 80px; }
+
+    /* Topbar adjustments */
+    .topbar { padding: 0 16px; }
+    .topbar-title { font-size: 15px; }
+
+    /* Content padding */
+    .content { padding: 16px; }
+
+    /* Stat grid: 1 column on small screens */
+    .stat-grid { grid-template-columns: 1fr; gap: 10px; margin-bottom: 16px; }
+
+    /* Grid-2 stacks vertically */
+    .grid-2 { grid-template-columns: 1fr; gap: 14px; }
+
+    /* Form grid: 1 column */
+    .form-grid { grid-template-columns: 1fr; }
+    .form-group.full { grid-column: 1; }
+
+    /* Template & action grids: 1 column */
+    .template-grid, .action-grid { grid-template-columns: 1fr; }
+
+    /* Wizard content full width */
+    .content[style*="max-width"] { max-width: 100% !important; }
+
+    /* Wizard steps: smaller */
+    .wizard-steps { gap: 0; margin-bottom: 20px; }
+    .step-label { font-size: 10px; }
+    .step-num { width: 24px; height: 24px; font-size: 11px; }
+
+    /* Record button slightly smaller */
+    .record-btn { width: 90px; height: 90px; }
+    .record-btn svg { width: 32px; height: 32px; }
+    .record-timer { font-size: 28px; }
+
+    /* Cal suggestion padding */
+    .cal-suggestion { padding: 14px 16px; }
+
+    /* Instruction banner: 1 column */
+    .instruction-grid { grid-template-columns: 1fr !important; }
+
+    /* Modal full width on mobile */
+    .cal-modal { width: 95vw; }
+
+    /* Buttons smaller on mobile */
+    .btn { padding: 8px 14px; font-size: 12px; }
+  }
+
+  @media (max-width: 400px) {
+    .stat-grid { gap: 8px; }
+    .content { padding: 12px; }
+  }
+</style>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://alcdn.msauth.net/browser/2.38.0/js/msal-browser.min.js"></script>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+      </div>
+      <div>
+        <div class="logo-text">VisitFlow</div>
+        <div class="logo-sub">Smart Debrief Tool</div>
+      </div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-label">Menu</div>
+    <a class="nav-item" onclick="showPage('dashboard')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </a>
+    <a class="nav-item active" onclick="showPage('new-visit')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      Nieuw Bezoek
+    </a>
+    <a class="nav-item" onclick="showPage('reports')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Rapporten
+      <span class="nav-badge">7</span>
+    </a>
+    <div class="nav-label">Beheer</div>
+    <a class="nav-item" onclick="showPage('settings')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41M21 12h-2M5 12H3M12 21v-2M12 5V3"/></svg>
+      Templates & Instellingen
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="user-avatar">RH</div>
+      <div class="user-info">
+        <div class="user-name">Rick Hermanns</div>
+        <div class="user-role">Fleet Sales DACH</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- DASHBOARD -->
+  <div id="page-dashboard" class="page">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="hamburger" onclick="toggleSidebar()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="topbar-title">Dashboard</div>
+      </div>
+      <div class="topbar-right">
+        <button class="btn btn-primary" onclick="showPage('new-visit')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Nieuw Bezoek
+        </button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="greeting" id="greeting-text"></div>
+      <script>
+        (function() {
+          const h = new Date().getHours();
+          const greet = h < 12 ? 'Goedemorgen 🌅' : h < 18 ? 'Goedemiddag ☀️' : 'Goedenavond 🌙';
+          document.getElementById('greeting-text').textContent = greet;
+        })();
+      </script>
+      <div class="greeting-sub">Hier is je bezoekactiviteit overzicht</div>
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Bezoeken deze week</div>
+          <div class="stat-value">7</div>
+          <div class="stat-sub">+2 t.o.v. vorige week</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Gesynchroniseerd met CRM</div>
+          <div class="stat-value">5</div>
+          <div class="stat-sub">2 nog in behandeling</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Openstaande opvolging</div>
+          <div class="stat-value">3</div>
+          <div class="stat-sub">1 vervalt vandaag</div>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Recente Bezoeken</span>
+              <a class="text-sm" style="color:var(--blue);cursor:pointer;font-weight:600;">Alle weergeven →</a>
+            </div>
+            <div class="card-body">
+              <div class="visit-item" onclick="showPage('reports')">
+                <div class="visit-avatar">EU</div>
+                <div class="visit-info">
+                  <div class="visit-company">Eurofleet Solutions BV</div>
+                  <div class="visit-meta">Marcus Weber · München · 1u 15min · 19-02-2026</div>
+                  <div style="margin-top:5px"><span class="tag">wagenpark scan</span><span class="tag">commercieel</span></div>
+                </div>
+                <div class="visit-right">
+                  <span class="badge badge-green">✓ voltooid</span>
+                </div>
+              </div>
+              <div class="visit-item" onclick="showPage('reports')">
+                <div class="visit-avatar">NL</div>
+                <div class="visit-info">
+                  <div class="visit-company">NordLog Transport AS</div>
+                  <div class="visit-meta">Ingrid Haugen · Oslo · 45min · 18-02-2026</div>
+                  <div style="margin-top:5px"><span class="tag">wagenpark scan</span><span class="tag">relatie</span></div>
+                </div>
+                <div class="visit-right">
+                  <span class="badge badge-blue">↑ gesync</span>
+                </div>
+              </div>
+              <div class="visit-item" onclick="showPage('reports')">
+                <div class="visit-avatar">IB</div>
+                <div class="visit-info">
+                  <div class="visit-company">Iberia Movilidad SL</div>
+                  <div class="visit-meta">Carlos Ruiz · Madrid · 2u · 17-02-2026</div>
+                  <div style="margin-top:5px"><span class="tag">intern</span></div>
+                </div>
+                <div class="visit-right">
+                  <span class="badge badge-amber">● concept</span>
+                </div>
+              </div>
+              <div class="visit-item" onclick="showPage('reports')">
+                <div class="visit-avatar">VD</div>
+                <div class="visit-info">
+                  <div class="visit-company">Van Dijke Fleet Management</div>
+                  <div class="visit-meta">Petra van Dijke · Rotterdam · 1u · 14-02-2026</div>
+                  <div style="margin-top:5px"><span class="tag">wagenpark scan</span></div>
+                </div>
+                <div class="visit-right">
+                  <span class="badge badge-green">✓ voltooid</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">Openstaande Acties</span></div>
+            <div class="card-body">
+              <div class="task-item">
+                <div class="task-check" onclick="markDone(this)"></div>
+                <div style="flex:1">
+                  <div class="task-text">Offerte voorbereiden</div>
+                  <div class="task-company">Eurofleet Solutions BV</div>
+                </div>
+                <div class="task-due">Vandaag</div>
+              </div>
+              <div class="task-item">
+                <div class="task-check" onclick="markDone(this)"></div>
+                <div style="flex:1">
+                  <div class="task-text">Terugbelafspraak inplannen</div>
+                  <div class="task-company">NordLog Transport AS</div>
+                </div>
+                <div class="task-due">22 feb</div>
+              </div>
+              <div class="task-item">
+                <div class="task-check" onclick="markDone(this)"></div>
+                <div style="flex:1">
+                  <div class="task-text">Documentatie sturen</div>
+                  <div class="task-company">Iberia Movilidad SL</div>
+                </div>
+                <div class="task-due">25 feb</div>
+              </div>
+              <div class="task-item">
+                <div class="task-check" onclick="markDone(this)"></div>
+                <div style="flex:1">
+                  <div class="task-text">LinkedIn verbinding aanvragen</div>
+                  <div class="task-company">Van Dijke Fleet Management</div>
+                </div>
+                <div class="task-due">26 feb</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEW VISIT -->
+  <div id="page-new-visit" class="page active">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="hamburger" onclick="toggleSidebar()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="topbar-title">Nieuw Bezoek</div>
+      </div>
+      <div class="topbar-right">
+        <button class="btn btn-ghost" onclick="showPage('dashboard')">Annuleren</button>
+      </div>
+    </div>
+    <div class="content" style="max-width:720px">
+      <div class="wizard-steps">
+        <div class="step active" id="step1"><div class="step-num">1</div><div class="step-label">Setup</div></div>
+        <div class="step-line" id="line1"></div>
+        <div class="step pending" id="step2"><div class="step-num">2</div><div class="step-label">Debrief</div></div>
+        <div class="step-line" id="line2"></div>
+        <div class="step pending" id="step3"><div class="step-num">3</div><div class="step-label">Review</div></div>
+        <div class="step-line" id="line3"></div>
+        <div class="step pending" id="step4"><div class="step-num">4</div><div class="step-label">Acties</div></div>
+      </div>
+
+      <!-- STEP 1: SETUP -->
+      <div id="wizard-step1">
+
+        <!-- HOW IT WORKS BANNER -->
+        <div style="background:var(--blue-pale);border:1.5px solid var(--blue);border-radius:var(--radius);padding:16px 20px;margin-bottom:20px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" style="width:18px;height:18px;flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span style="font-size:13px;font-weight:700;color:var(--blue)">Zo werkt VisitFlow — 4 stappen</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;" class="instruction-grid">
+            <div style="display:flex;align-items:flex-start;gap:8px;">
+              <div style="width:22px;height:22px;border-radius:50%;background:var(--blue);color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div>
+              <div><div style="font-size:12px;font-weight:700;color:var(--grey-800)">Setup</div><div style="font-size:11px;color:var(--grey-600)">Selecteer je afspraak uit de agenda of vul het bedrijf en contactpersoon in</div></div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:8px;">
+              <div style="width:22px;height:22px;border-radius:50%;background:var(--grey-200);color:var(--grey-600);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div>
+              <div><div style="font-size:12px;font-weight:700;color:var(--grey-800)">Debrief</div><div style="font-size:11px;color:var(--grey-600)">Spreek je notities in — VisitFlow transcribeert en structureert automatisch</div></div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:8px;">
+              <div style="width:22px;height:22px;border-radius:50%;background:var(--grey-200);color:var(--grey-600);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div>
+              <div><div style="font-size:12px;font-weight:700;color:var(--grey-800)">Review</div><div style="font-size:11px;color:var(--grey-600)">Controleer en vul het gegenereerde rapport aan waar nodig</div></div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:8px;">
+              <div style="width:22px;height:22px;border-radius:50%;background:var(--grey-200);color:var(--grey-600);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</div>
+              <div><div style="font-size:12px;font-weight:700;color:var(--grey-800)">Acties</div><div style="font-size:11px;color:var(--grey-600)">Sla op, stuur naar CRM of deel het rapport — klaar in minder dan 3 minuten</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CALENDAR SUGGESTION -->
+        <div class="cal-suggestion" id="calSuggestion">
+          <div class="cal-suggestion-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Meest recente afspraak uit je agenda
+          </div>
+          <div class="cal-event">
+            <div class="cal-event-time">
+              <div class="cal-event-time-hour" id="calTime">14:30</div>
+              <div class="cal-event-time-ampm" id="calDate">Vr 20 feb</div>
+            </div>
+            <div class="cal-event-info">
+              <div class="cal-event-title" id="calTitle">Eurofleet Solutions BV — Wagenpark gesprek</div>
+              <div class="cal-event-meta">
+                <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>&nbsp;<span id="calContact">Marcus Weber</span></span>
+                &nbsp;·&nbsp;
+                <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>&nbsp;<span id="calLocation">Amsterdam HQ</span></span>
+                &nbsp;·&nbsp;
+                <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>&nbsp;<span id="calDuration">1u</span></span>
+              </div>
+            </div>
+          </div>
+          <div class="cal-actions">
+            <button class="btn-cal-use" onclick="useCalendarEvent()">✓ Gebruik deze afspraak</button>
+            <button class="btn-cal-other" onclick="openCalModal()">↕ Andere afspraak kiezen</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-header">
+            <span class="card-title">Bezoekgegevens</span>
+            <span id="calFilledBadge" style="display:none" class="badge badge-blue">📅 Ingevuld vanuit agenda</span>
+          </div>
+          <div style="padding:20px">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Bedrijfsnaam *</label>
+                <input type="text" id="company-name" placeholder="bijv. Eurofleet Solutions BV">
+              </div>
+              <div class="form-group">
+                <label>Contactpersoon *</label>
+                <input type="text" id="contact-name" placeholder="bijv. Jan de Vries">
+              </div>
+              <div class="form-group">
+                <label>Datum</label>
+                <input type="date" id="visit-date" value="2026-02-20">
+              </div>
+              <div class="form-group">
+                <label>Locatie</label>
+                <input type="text" id="visit-location" placeholder="bijv. Amsterdam HQ">
+              </div>
+              <div class="form-group full">
+                <label>Extra aanwezigen</label>
+                <input type="text" id="attendees" placeholder="bijv. Sarah Janssen, Tom Peters">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:20px">
+          <div class="card-header"><span class="card-title">Selecteer rapport-templates</span><span class="text-xs text-muted">Minimaal 1 vereist</span></div>
+          <div style="padding:20px">
+            <div class="template-grid">
+              <div class="template-card selected" onclick="toggleTemplate(this)">
+                <div class="template-card-check"></div>
+                <div class="template-card-name">Wagenpark Mobility Scan</div>
+                <div class="template-card-dest">📧 Klant + CRM</div>
+                <div class="template-card-fields">32 velden · 5 secties · PDF</div>
+              </div>
+              <div class="template-card" onclick="toggleTemplate(this)">
+                <div class="template-card-check"></div>
+                <div class="template-card-name">Intern Bezoekrapport</div>
+                <div class="template-card-dest">🏢 Intern · SharePoint</div>
+                <div class="template-card-fields">18 velden · 3 secties · DOCX</div>
+              </div>
+              <div class="template-card" onclick="toggleTemplate(this)">
+                <div class="template-card-check"></div>
+                <div class="template-card-name">Merk A Rapportage</div>
+                <div class="template-card-dest">🏷️ Brand portal</div>
+                <div class="template-card-fields">24 velden · 4 secties · PDF</div>
+              </div>
+              <div class="template-card" onclick="toggleTemplate(this)">
+                <div class="template-card-check"></div>
+                <div class="template-card-name">Klantensamenvatting</div>
+                <div class="template-card-dest">📧 Klant</div>
+                <div class="template-card-fields">12 velden · 2 secties · PDF</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end">
+          <button class="btn btn-primary" onclick="goToStep2()">Start Debrief →</button>
+        </div>
+      </div>
+
+      <!-- STEP 2: DEBRIEF -->
+      <div id="wizard-step2" style="display:none">
+        <div class="card">
+          <div id="recording-ui">
+            <div class="recorder-wrap">
+              <div style="font-size:13px;color:var(--grey-400);margin-bottom:24px;text-align:center">Spreek vrij over je bezoek. Vertel wie er waren, wat er besproken is, en wat de volgende stappen zijn.</div>
+              <button class="record-btn" id="recordBtn" onclick="toggleRecording()">
+                <svg viewBox="0 0 24 24"><path d="M12 1a4 4 0 014 4v6a4 4 0 01-8 0V5a4 4 0 014-4zm0 14a7 7 0 007-7h2a9 9 0 01-8 8.94V19h3v2H8v-2h3v-2.06A9 9 0 013 8h2a7 7 0 007 7z"/></svg>
+              </button>
+              <div class="record-timer" id="timerDisplay">0:00</div>
+              <div class="record-status" id="recordStatus">Klik om te beginnen met opnemen</div>
+              <button class="btn btn-ghost" id="stopBtn" style="display:none" onclick="stopAndProcess()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><rect x="6" y="6" width="12" height="12"/></svg>
+                Verwerken
+              </button>
+            </div>
+
+            <!-- KEYWORD CHEATSHEET -->
+            <div id="keyword-cheatsheet" style="margin-top:24px;border-top:1.5px solid var(--grey-100);padding-top:18px;display:none">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+                <div style="font-size:11px;font-weight:700;color:var(--grey-500);text-transform:uppercase;letter-spacing:0.8px;">
+                  📋 Onderwerpen om te benoemen
+                </div>
+                <div style="font-size:11px;color:var(--grey-400)" id="kw-progress">0 / 0 afgevinkt</div>
+              </div>
+              <div id="keyword-chips" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+              <div style="font-size:11px;color:var(--grey-400);margin-top:10px;">Tik een onderwerp aan om het af te vinken</div>
+            </div>
+          </div>
+          <div id="processing-ui" style="display:none">
+            <div class="processing-overlay">
+              <div class="spinner"></div>
+              <div style="font-size:15px;font-weight:700;color:var(--grey-800)">Debrief verwerken...</div>
+              <div class="processing-steps">
+                <div class="processing-step active" id="pstep1">🎙️ Audio transcriberen...</div>
+                <div class="processing-step" id="pstep2">🧠 Debrief analyseren...</div>
+                <div class="processing-step" id="pstep3">📋 Velden invullen...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:16px">
+          <button class="btn btn-ghost" onclick="goToStep1()">← Terug</button>
+          <button class="btn btn-secondary" onclick="skipToReview()">Overslaan → Review</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: REVIEW -->
+      <div id="wizard-step3" style="display:none">
+        <div class="card" style="margin-bottom:16px">
+          <div style="padding:16px 20px">
+            <div style="font-size:13px;color:var(--grey-600);margin-bottom:8px;font-weight:600">📝 Transcript</div>
+            <div class="transcript-box">"Bezocht Eurofleet Solutions in Amsterdam. Gesproken met Marcus Weber, fleet manager, en Sarah Janssen van inkoop. Ze hebben momenteel 47 bedrijfsauto's en 12 bestelwagens. Voornamelijk lease bij Athlon. Rijden nu BMW en Volkswagen. Overwegen elektrisch voor de volgende cyclus. 8 laadpalen op eigen terrein. Interesse in ons Private Lease aanbod voor management. Graag offerte voor 15 voertuigen. Volgende afspraak over 3 weken inplannen."</div>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:16px">
+          <div style="padding:20px">
+            <div class="tab-bar" id="reviewTabs">
+              <div class="tab active" onclick="switchTab(0)">Wagenpark Scan</div>
+            </div>
+            <div id="reviewContent">
+              <div class="needs-input">
+                <div class="needs-input-header" onclick="toggleNeedsInput()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                  Needs your input (4 velden niet ingevuld)
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left:auto;width:14px;height:14px" id="needsChevron"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+                <div id="needsInputFields">
+                  <div class="field-row amber-field">
+                    <div class="field-label">Criteria besluitvorming</div>
+                    <input type="text" placeholder="Niet vermeld in debrief..." style="border-color:var(--amber);background:white">
+                  </div>
+                  <div class="field-row amber-field">
+                    <div class="field-label">Autoregeling aanwezig</div>
+                    <select style="border-color:var(--amber);background:white"><option value="">Selecteer...</option><option>ja</option><option>nee</option></select>
+                  </div>
+                  <div class="field-row amber-field">
+                    <div class="field-label">Vaste partners schadeherstel</div>
+                    <select style="border-color:var(--amber);background:white"><option value="">Selecteer...</option><option>ja</option><option>nee</option></select>
+                  </div>
+                  <div class="field-row amber-field">
+                    <div class="field-label">Verhouding brandstof/hybride/elektrisch</div>
+                    <input type="text" placeholder="Niet vermeld in debrief..." style="border-color:var(--amber);background:white">
+                  </div>
+                </div>
+              </div>
+
+              <div class="section-title">Branche en Bedrijf</div>
+              <div class="form-grid">
+                <div class="field-row">
+                  <div class="field-label">Aantal vestigingen <span class="voice-badge">🎙 voice</span></div>
+                  <input type="number" value="3">
+                </div>
+                <div class="field-row">
+                  <div class="field-label">Aantal medewerkers <span class="voice-badge">🎙 voice</span></div>
+                  <input type="number" value="180">
+                </div>
+              </div>
+
+              <div class="section-title">Besluitvorming</div>
+              <div class="form-grid">
+                <div class="field-row">
+                  <div class="field-label">Rol contactpersoon <span class="voice-badge">🎙 voice</span></div>
+                  <select><option>beslisser</option><option>beïnvloeder</option></select>
+                </div>
+                <div class="field-row">
+                  <div class="field-label">Wie neemt beslissingen wagenpark <span class="voice-badge">🎙 voice</span></div>
+                  <input type="text" value="Marcus Weber (fleet manager)">
+                </div>
+                <div class="field-row">
+                  <div class="field-label">Invloed berijder op aankoop <span class="voice-badge">🎙 voice</span></div>
+                  <select><option>enige</option><option>geen</option><option>alle</option></select>
+                </div>
+              </div>
+
+              <div class="section-title">Wagenpark overzicht</div>
+              <div class="form-grid">
+                <div class="field-row">
+                  <div class="field-label">Aantal personenwagens <span class="voice-badge">🎙 voice</span></div>
+                  <input type="number" value="47">
+                </div>
+                <div class="field-row">
+                  <div class="field-label">Primaire merken <span class="voice-badge">🎙 voice</span></div>
+                  <input type="text" value="BMW, Volkswagen">
+                </div>
+                <div class="field-row">
+                  <div class="field-label">Koop of lease <span class="voice-badge">🎙 voice</span></div>
+                  <select><option>lease</option><option>koop</option></select>
+                </div>
+                <div class="field-row">
+                  <div class="field-label">Aantal bedrijfswagens <span class="voice-badge">🎙 voice</span></div>
+                  <input type="number" value="12">
+                </div>
+                <div class="field-row">
+                  <div class="field-label">Aantal laadpalen eigen terrein <span class="voice-badge">🎙 voice</span></div>
+                  <input type="number" value="8">
+                </div>
+                <div class="field-row">
+                  <div class="field-label">Wagenpark beheertool <span class="voice-badge">🎙 voice</span></div>
+                  <input type="text" value="Athlon portal">
+                </div>
+              </div>
+
+              <div class="section-title">Autoregeling</div>
+              <div class="form-grid">
+                <div class="field-row">
+                  <div class="field-label">Voorstel doen naar aanleiding scan <span class="voice-badge">🎙 voice</span></div>
+                  <select><option>ja</option><option>nee</option></select>
+                </div>
+                <div class="field-row">
+                  <div class="field-label">Criteria nieuwe personenwagens <span class="voice-badge">🎙 voice</span></div>
+                  <input type="text" value="Elektrisch, laag TCO, comfort">
+                </div>
+              </div>
+
+              <div class="section-title">Volgende actie</div>
+              <div class="form-grid">
+                <div class="field-row">
+                  <div class="field-label"><input type="checkbox" checked style="width:auto;padding:0;border:none;box-shadow:none"> Plan nieuwe afspraak</div>
+                  <input type="date" value="2026-03-12">
+                </div>
+                <div class="field-row">
+                  <div class="field-label">Notities</div>
+                  <input type="text" value="Offerte 15 voertuigen meenemen">
+                </div>
+              </div>
+
+              <div class="section-title">Opmerkingen (automatisch ingevuld)</div>
+              <textarea rows="4">Klant overweegt elektrisch voor volgende wagenparkcyclus. Sarah Janssen van inkoop aanwezig — interesse in Private Lease aanbod voor management (15 voertuigen). Rijden nu Athlon als leasemaatschappij.</textarea>
+
+              <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--grey-100)">
+                <div style="font-size:12px;font-weight:600;color:var(--grey-600);margin-bottom:10px">Aanwezigen</div>
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+                  <span style="font-size:13px;color:var(--grey-800)">Marcus Weber — Eurofleet Solutions</span>
+                  <a class="linkedin-btn" href="https://www.linkedin.com/search/results/people/?keywords=Marcus+Weber+Eurofleet+Solutions" target="_blank">
+                    <svg viewBox="0 0 24 24"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
+                    LinkedIn
+                  </a>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px">
+                  <span style="font-size:13px;color:var(--grey-800)">Sarah Janssen — Eurofleet Solutions</span>
+                  <a class="linkedin-btn" href="https://www.linkedin.com/search/results/people/?keywords=Sarah+Janssen+Eurofleet+Solutions" target="_blank">
+                    <svg viewBox="0 0 24 24"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
+                    LinkedIn
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:4px">
+          <button class="btn btn-ghost" onclick="goToStep2()">← Terug</button>
+          <button class="btn btn-green" onclick="approveAndExport()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Goedkeuren & Exporteren
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 4: NEXT ACTIONS -->
+      <div id="wizard-step4" style="display:none">
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-header">
+            <span class="card-title">✅ Rapport goedgekeurd</span>
+            <span class="badge badge-green">PDF gegenereerd</span>
+          </div>
+          <div style="padding:16px 20px;font-size:13px;color:var(--grey-600)">Wagenpark Mobility Scan — Eurofleet Solutions BV — 20 feb 2026</div>
+        </div>
+        <!-- VERZENDEN & DELEN BLOK -->
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-header">
+            <span class="card-title">📤 Verzenden & delen</span>
+            <span class="text-xs text-muted">Kies ontvanger(s) en formaat</span>
+          </div>
+          <div style="padding:20px">
+
+            <!-- FORMAAT KEUZE -->
+            <div style="margin-bottom:18px">
+              <div style="font-size:11px;font-weight:700;color:var(--grey-500);text-transform:uppercase;letter-spacing:0.7px;margin-bottom:10px">Formaat</div>
+              <div style="display:flex;flex-wrap:wrap;gap:8px" id="format-options">
+                <div class="format-chip selected" onclick="toggleChip(this)">📎 PDF bijlage</div>
+                <div class="format-chip" onclick="toggleChip(this)">🔗 Online link</div>
+                <div class="format-chip" onclick="toggleChip(this)">✉️ Platte tekst</div>
+                <div class="format-chip" onclick="toggleChip(this)">📝 Word/DOCX</div>
+              </div>
+            </div>
+
+            <!-- ONTVANGERS -->
+            <div style="font-size:11px;font-weight:700;color:var(--grey-500);text-transform:uppercase;letter-spacing:0.7px;margin-bottom:10px">Ontvangers</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+
+              <!-- Klant -->
+              <div class="send-row" id="send-client">
+                <div class="send-row-toggle" onclick="toggleSendRow('send-client')">
+                  <div class="send-row-check" id="check-send-client"></div>
+                  <div class="send-row-icon" style="background:#E3F2FD">📧</div>
+                  <div>
+                    <div class="send-row-label">Klant</div>
+                    <div class="send-row-sub">Marcus Weber — <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="acc182dbc9cec9deecc9d9dec3cac0c9c9d882c2c0">[email&#160;protected]</a></div>
+                  </div>
+                </div>
+                <div class="send-row-detail" id="detail-send-client" style="display:none">
+                  <input type="email" class="field-input" value="m.weber@eurofleet.nl" placeholder="E-mailadres klant" style="margin-bottom:6px">
+                  <textarea class="field-input" rows="2" placeholder="Persoonlijk bericht (optioneel)..." style="resize:none;font-size:12px">Beste Marcus, bijgaand het verslag van ons gesprek van vandaag...</textarea>
+                </div>
+              </div>
+
+              <!-- Intern team -->
+              <div class="send-row" id="send-team">
+                <div class="send-row-toggle" onclick="toggleSendRow('send-team')">
+                  <div class="send-row-check" id="check-send-team"></div>
+                  <div class="send-row-icon" style="background:#F3E5F5">🏢</div>
+                  <div>
+                    <div class="send-row-label">Intern team / manager</div>
+                    <div class="send-row-sub">Via email of Teams</div>
+                  </div>
+                </div>
+                <div class="send-row-detail" id="detail-send-team" style="display:none">
+                  <input type="email" class="field-input" placeholder="E-mailadres(sen), komma-gescheiden" style="margin-bottom:6px">
+                  <div style="display:flex;gap:8px;flex-wrap:wrap">
+                    <div class="format-chip selected" onclick="toggleChip(this)" style="font-size:11px">📧 Email</div>
+                    <div class="format-chip" onclick="toggleChip(this)" style="font-size:11px">💬 Teams bericht</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Jezelf -->
+              <div class="send-row" id="send-self">
+                <div class="send-row-toggle" onclick="toggleSendRow('send-self')">
+                  <div class="send-row-check" id="check-send-self"></div>
+                  <div class="send-row-icon" style="background:#E8F5E9">🗄️</div>
+                  <div>
+                    <div class="send-row-label">Jezelf (archief)</div>
+                    <div class="send-row-sub">Kopie naar eigen inbox of Drive</div>
+                  </div>
+                </div>
+                <div class="send-row-detail" id="detail-send-self" style="display:none">
+                  <div style="display:flex;gap:8px;flex-wrap:wrap">
+                    <div class="format-chip selected" onclick="toggleChip(this)" style="font-size:11px">📧 Eigen email</div>
+                    <div class="format-chip" onclick="toggleChip(this)" style="font-size:11px">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07C7.4 19.29 4.71 16.6 3.07 13.18A19.79 19.79 0 01.01 4.55 2 2 0 012.01 2.37h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 9.91"/></svg>
+                      Google Drive
+                    </div>
+                    <div class="format-chip" onclick="toggleChip(this)" style="font-size:11px">🗂️ SharePoint</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- WhatsApp -->
+              <div class="send-row" id="send-whatsapp">
+                <div class="send-row-toggle" onclick="toggleSendRow('send-whatsapp')">
+                  <div class="send-row-check" id="check-send-whatsapp"></div>
+                  <div class="send-row-icon" style="background:#E8F5E9">💬</div>
+                  <div>
+                    <div class="send-row-label">WhatsApp</div>
+                    <div class="send-row-sub">Stuur samenvatting of link</div>
+                  </div>
+                </div>
+                <div class="send-row-detail" id="detail-send-whatsapp" style="display:none">
+                  <input type="tel" class="field-input" placeholder="Telefoonnummer (incl. +31)" style="margin-bottom:6px">
+                  <div style="display:flex;gap:8px">
+                    <div class="format-chip selected" onclick="toggleChip(this)" style="font-size:11px">📝 Samenvatting tekst</div>
+                    <div class="format-chip" onclick="toggleChip(this)" style="font-size:11px">🔗 Link naar rapport</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- CRM -->
+              <div class="send-row" id="send-crm">
+                <div class="send-row-toggle" onclick="toggleSendRow('send-crm')">
+                  <div class="send-row-check" id="check-send-crm"></div>
+                  <div class="send-row-icon" style="background:#FFF8E1">🔄</div>
+                  <div>
+                    <div class="send-row-label">CRM synchroniseren</div>
+                    <div class="send-row-sub">Salesforce / HubSpot / eigen CRM</div>
+                  </div>
+                </div>
+                <div class="send-row-detail" id="detail-send-crm" style="display:none">
+                  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+                    <div class="format-chip selected" onclick="toggleChip(this)" style="font-size:11px">☁️ Salesforce</div>
+                    <div class="format-chip" onclick="toggleChip(this)" style="font-size:11px">🟠 HubSpot</div>
+                    <div class="format-chip" onclick="toggleChip(this)" style="font-size:11px">⚙️ Eigen CRM</div>
+                  </div>
+                  <div style="display:flex;gap:8px;flex-wrap:wrap">
+                    <div class="format-chip selected" onclick="toggleChip(this)" style="font-size:11px">📋 Bezoeknotitie</div>
+                    <div class="format-chip" onclick="toggleChip(this)" style="font-size:11px">📎 PDF bijlage</div>
+                    <div class="format-chip" onclick="toggleChip(this)" style="font-size:11px">✅ Taak aanmaken</div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- VERZEND KNOP -->
+            <div style="margin-top:18px;padding-top:16px;border-top:1.5px solid var(--grey-100);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+              <div style="font-size:12px;color:var(--grey-500)" id="send-summary-text">Geen ontvangers geselecteerd</div>
+              <button class="btn btn-primary" onclick="sendReport()" id="send-btn" disabled style="opacity:0.4">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                Verstuur rapport
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-header"><span class="card-title">Volgende acties</span><span class="text-xs text-muted">Selecteer 1 of meer</span></div>
+          <div style="padding:20px">
+            <div class="action-grid">
+              <div class="action-card selected" onclick="toggleAction(this)">
+                <div class="action-icon">
+                  <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                </div>
+                <div>
+                  <div class="action-label">Offerte voorbereiden</div>
+                  <div class="action-desc">Maak een voorstel aan</div>
+                  <div class="action-extra">
+                    <input type="text" placeholder="Omschrijving offerte..." value="Private Lease 15 voertuigen" style="font-size:12px;padding:6px 10px">
+                  </div>
+                </div>
+              </div>
+              <div class="action-card" onclick="toggleAction(this);loadSlots('slots-bezoek')" style="grid-column:1/-1">
+                <div class="action-icon">
+                  <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </div>
+                <div style="flex:1">
+                  <div class="action-label">Bezoek inplannen</div>
+                  <div class="action-desc">Kies een vrij moment uit je agenda</div>
+                  <div class="action-extra" onclick="event.stopPropagation()">
+                    <div id="slots-bezoek">
+                      <div class="slot-loading">📅 Agenda ophalen...</div>
+                    </div>
+                    <div id="selected-slot-bezoek" class="selected-slot" style="display:none"></div>
+                    <div style="margin-top:10px">
+                      <input type="text" class="field-input" placeholder="Titel afspraak..." value="Vervolgbezoek — Eurofleet Solutions" style="font-size:12px;margin-bottom:6px">
+                      <input type="text" class="field-input" placeholder="Locatie (optioneel)..." style="font-size:12px">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="action-card" onclick="toggleAction(this);loadSlots('slots-bellen')" style="grid-column:1/-1">
+                <div class="action-icon">
+                  <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.01 1.17 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.06 6.06l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92z"/></svg>
+                </div>
+                <div style="flex:1">
+                  <div class="action-label">Terugbellen</div>
+                  <div class="action-desc">Kies een vrij moment uit je agenda</div>
+                  <div class="action-extra" onclick="event.stopPropagation()">
+                    <div id="slots-bellen">
+                      <div class="slot-loading">📅 Agenda ophalen...</div>
+                    </div>
+                    <div id="selected-slot-bellen" class="selected-slot" style="display:none"></div>
+                    <div style="margin-top:10px">
+                      <input type="text" class="field-input" placeholder="Notitie (optioneel)..." style="font-size:12px">
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="action-card" onclick="toggleAction(this)" style="grid-column:1/-1">
+                <div class="action-icon">
+                  <svg viewBox="0 0 24 24"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z"/></svg>
+                </div>
+                <div style="flex:1">
+                  <div class="action-label">Info sturen</div>
+                  <div class="action-desc">Selecteer content uit de bibliotheek of voeg zelf toe</div>
+                  <div class="action-extra" onclick="event.stopPropagation()">
+
+                    <!-- BIBLIOTHEEK -->
+                    <div style="font-size:11px;font-weight:700;color:var(--grey-500);text-transform:uppercase;letter-spacing:0.7px;margin-bottom:8px">📚 Contentbibliotheek</div>
+                    <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px" id="content-library">
+
+                      <label class="content-item">
+                        <input type="checkbox" class="content-check">
+                        <div class="content-item-icon">📄</div>
+                        <div>
+                          <div class="content-item-title">Case: Electrificatie wagenpark Heineken</div>
+                          <div class="content-item-meta">Case study · PDF · 2 pagina's</div>
+                        </div>
+                      </label>
+
+                      <label class="content-item">
+                        <input type="checkbox" class="content-check">
+                        <div class="content-item-icon">📄</div>
+                        <div>
+                          <div class="content-item-title">Case: TCO-analyse Private Lease vs. Financial Lease</div>
+                          <div class="content-item-meta">Case study · PDF · 3 pagina's</div>
+                        </div>
+                      </label>
+
+                      <label class="content-item">
+                        <input type="checkbox" class="content-check">
+                        <div class="content-item-icon">📰</div>
+                        <div>
+                          <div class="content-item-title">Artikel: EV-readiness voor zakelijke rijders 2026</div>
+                          <div class="content-item-meta">Artikel · Link · Automotive Week</div>
+                        </div>
+                      </label>
+
+                      <label class="content-item">
+                        <input type="checkbox" class="content-check">
+                        <div class="content-item-icon">📰</div>
+                        <div>
+                          <div class="content-item-title">Artikel: Laadinfrastructuur zakelijk — wat je moet weten</div>
+                          <div class="content-item-meta">Artikel · Link · Fleet Europe</div>
+                        </div>
+                      </label>
+
+                      <label class="content-item">
+                        <input type="checkbox" class="content-check">
+                        <div class="content-item-icon">📄</div>
+                        <div>
+                          <div class="content-item-title">Case: Wagenpark optimalisatie LogiTrans BV</div>
+                          <div class="content-item-meta">Case study · PDF · 4 pagina's</div>
+                        </div>
+                      </label>
+
+                    </div>
+
+                    <!-- VRIJ VELD -->
+                    <div style="font-size:11px;font-weight:700;color:var(--grey-500);text-transform:uppercase;letter-spacing:0.7px;margin-bottom:6px">✏️ Zelf toevoegen</div>
+                    <div style="display:flex;gap:8px;align-items:center">
+                      <input type="text" id="custom-content-input" class="field-input" placeholder="Naam of URL van document / artikel..." style="flex:1;font-size:12px">
+                      <button class="btn btn-secondary" style="padding:7px 12px;font-size:12px;white-space:nowrap" onclick="addCustomContent()">+ Toevoegen</button>
+                    </div>
+                    <div id="custom-content-list" style="margin-top:8px;display:flex;flex-direction:column;gap:6px"></div>
+
+                  </div>
+                </div>
+              </div>
+              <div class="action-card" onclick="toggleAction(this)" style="grid-column:1/-1">
+                <div class="action-icon" style="background:#E7F0F9">
+                  <svg viewBox="0 0 24 24" style="stroke:#0A66C2"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
+                </div>
+                <div>
+                  <div class="action-label">Verbinden op LinkedIn</div>
+                  <div class="action-desc">Marcus Weber & Sarah Janssen — Eurofleet Solutions</div>
+                  <div class="action-extra" style="display:flex;gap:8px;flex-wrap:wrap">
+                    <a class="linkedin-btn" href="https://www.linkedin.com/search/results/people/?keywords=Marcus+Weber+Eurofleet" target="_blank">🔗 Marcus Weber</a>
+                    <a class="linkedin-btn" href="https://www.linkedin.com/search/results/people/?keywords=Sarah+Janssen+Eurofleet" target="_blank">🔗 Sarah Janssen</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between">
+          <button class="btn btn-ghost" onclick="goToStep3()">← Terug</button>
+          <button class="btn btn-primary" onclick="finishVisit()">Bezoek afronden ✓</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REPORTS -->
+  <div id="page-reports" class="page">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="hamburger" onclick="toggleSidebar()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="topbar-title">Rapporten</div>
+      </div>
+      <div class="topbar-right">
+        <select style="padding:8px 12px;font-size:13px;border:1.5px solid var(--grey-200);border-radius:8px;background:white">
+          <option>Alle statussen</option><option>Concept</option><option>Voltooid</option><option>Gesynchroniseerd</option>
+        </select>
+      </div>
+    </div>
+    <div class="content">
+      <div class="search-bar">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input placeholder="Zoek op bedrijf of contactpersoon...">
+      </div>
+      <div class="card">
+        <div class="card-body">
+          <div class="visit-item"><div class="visit-avatar">EU</div><div class="visit-info"><div class="visit-company">Eurofleet Solutions BV</div><div class="visit-meta">Marcus Weber · 20 feb 2026 · Wagenpark Scan</div></div><div class="visit-right"><span class="badge badge-green">✓ voltooid</span><button class="btn btn-ghost" style="padding:5px 10px;font-size:11px" onclick="showToast('📄 PDF wordt gedownload...')">↓ PDF</button></div></div>
+          <div class="visit-item"><div class="visit-avatar">NL</div><div class="visit-info"><div class="visit-company">NordLog Transport AS</div><div class="visit-meta">Ingrid Haugen · 18 feb 2026 · Wagenpark Scan + Intern</div></div><div class="visit-right"><span class="badge badge-blue">↑ gesync</span><button class="btn btn-ghost" style="padding:5px 10px;font-size:11px" onclick="showToast('📄 PDF wordt gedownload...')">↓ PDF</button></div></div>
+          <div class="visit-item"><div class="visit-avatar">IB</div><div class="visit-info"><div class="visit-company">Iberia Movilidad SL</div><div class="visit-meta">Carlos Ruiz · 17 feb 2026 · Intern</div></div><div class="visit-right"><span class="badge badge-amber">● concept</span><button class="btn btn-primary" style="padding:5px 10px;font-size:11px" onclick="showPage('new-visit')">Hervatten</button></div></div>
+          <div class="visit-item"><div class="visit-avatar">VD</div><div class="visit-info"><div class="visit-company">Van Dijke Fleet Management</div><div class="visit-meta">Petra van Dijke · 14 feb 2026 · Wagenpark Scan</div></div><div class="visit-right"><span class="badge badge-green">✓ voltooid</span><button class="btn btn-ghost" style="padding:5px 10px;font-size:11px" onclick="showToast('📄 PDF wordt gedownload...')">↓ PDF</button></div></div>
+          <div class="visit-item"><div class="visit-avatar">MS</div><div class="visit-info"><div class="visit-company">MobiStart GmbH</div><div class="visit-meta">Klaus Bauer · 11 feb 2026 · Wagenpark Scan + Merk A</div></div><div class="visit-right"><span class="badge badge-green">✓ voltooid</span><button class="btn btn-ghost" style="padding:5px 10px;font-size:11px" onclick="showToast('📄 PDF wordt gedownload...')">↓ PDF</button></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div id="page-settings" class="page">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="hamburger" onclick="toggleSidebar()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="topbar-title">Templates & Instellingen</div>
+      </div>
+      <div class="topbar-right">
+        <button class="btn btn-primary" onclick="showToast('➕ Nieuw template formulier opent binnenkort')">+ Nieuw Template</button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="settings-section">
+        <div class="settings-title">Rapport Templates</div>
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-name">Wagenpark Mobility Scan</div>
+            <div class="settings-row-sub">32 velden · 5 secties · PDF → Klant + CRM</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <span class="badge badge-green">Standaard</span>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            <button class="btn btn-ghost" style="padding:6px 12px;font-size:12px" onclick="showToast('✏️ Template bewerker opent binnenkort')">Bewerken</button>
+          </div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-name">Intern Bezoekrapport</div>
+            <div class="settings-row-sub">18 velden · 3 secties · DOCX → SharePoint</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <div class="toggle" onclick="this.classList.toggle('on')"></div>
+            <button class="btn btn-ghost" style="padding:6px 12px;font-size:12px" onclick="showToast('✏️ Template bewerker opent binnenkort')">Bewerken</button>
+          </div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-name">Merk A Rapportage</div>
+            <div class="settings-row-sub">24 velden · 4 secties · PDF → Brand Portal</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <div class="toggle" onclick="this.classList.toggle('on')"></div>
+            <button class="btn btn-ghost" style="padding:6px 12px;font-size:12px" onclick="showToast('✏️ Template bewerker opent binnenkort')">Bewerken</button>
+          </div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-name">Klantensamenvatting</div>
+            <div class="settings-row-sub">12 velden · 2 secties · PDF → Klant</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <div class="toggle" onclick="this.classList.toggle('on')"></div>
+            <button class="btn btn-ghost" style="padding:6px 12px;font-size:12px" onclick="showToast('✏️ Template bewerker opent binnenkort')">Bewerken</button>
+          </div>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-title">Standaard Instellingen</div>
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-name">Standaard templates auto-selecteren bij nieuw bezoek</div>
+            <div class="settings-row-sub">Templates met 'Standaard' worden automatisch aangevinkt</div>
+          </div>
+          <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-name">Debrief transcript opslaan</div>
+            <div class="settings-row-sub">Bewaar het ruwe transcript naast het gestructureerde rapport</div>
+          </div>
+          <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-name">LinkedIn verbindingslink tonen</div>
+            <div class="settings-row-sub">Toon LinkedIn knoppen naast aanwezigen</div>
+          </div>
+          <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-title">Integraties</div>
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-name">OpenAI API</div>
+            <div class="settings-row-sub">Verbind voor echte AI transcriptie en veld-mapping</div>
+          </div>
+          <button class="btn btn-ghost" style="font-size:12px;padding:6px 12px" onclick="showToast('🔑 API sleutel invoer opent binnenkort')">Verbinden</button>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-name">Google Drive</div>
+            <div class="settings-row-sub">Rapporten automatisch opslaan in Drive</div>
+          </div>
+          <button class="btn btn-ghost" style="font-size:12px;padding:6px 12px" onclick="showToast('🔗 Google Drive koppeling opent binnenkort')">Verbinden</button>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-name">CRM Integratie</div>
+            <div class="settings-row-sub">Sync bezoekdata naar jouw CRM</div>
+          </div>
+          <button class="btn btn-ghost" style="font-size:12px;padding:6px 12px" onclick="showToast('🔗 CRM koppeling opent binnenkort')">Verbinden</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  // Navigation
+  function showPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('page-' + id).classList.add('active');
+    const map = { 'dashboard': 0, 'new-visit': 1, 'reports': 2, 'settings': 3 };
+    const items = document.querySelectorAll('.nav-item');
+    if (map[id] !== undefined) items[map[id]].classList.add('active');
+    if (id === 'new-visit') resetWizard();
+    // Sync mobile bottom nav
+    document.querySelectorAll('.mobile-nav-item').forEach(el => el.classList.remove('active'));
+    const mEl = document.getElementById('mnav-' + id);
+    if (mEl) mEl.classList.add('active');
+    // Close sidebar overlay if open
+    document.querySelector('.sidebar').classList.remove('open');
+    const overlay = document.getElementById('sidebarOverlay');
+    if (overlay) overlay.classList.remove('open');
+  }
+
+  // Wizard
+  function resetWizard() {
+    showWizardStep(1);
+  }
+
+  function showWizardStep(n) {
+    ['wizard-step1','wizard-step2','wizard-step3','wizard-step4'].forEach((id,i) => {
+      document.getElementById(id).style.display = (i+1 === n) ? 'block' : 'none';
+    });
+    for (let i = 1; i <= 4; i++) {
+      const s = document.getElementById('step' + i);
+      s.className = 'step ' + (i < n ? 'done' : i === n ? 'active' : 'pending');
+    }
+    for (let i = 1; i <= 3; i++) {
+      const l = document.getElementById('line' + i);
+      if (l) l.className = 'step-line ' + (i < n ? 'done' : '');
+    }
+  }
+
+  function goToStep1() { showWizardStep(1); }
+  // Template keywords per template
+  const templateKeywords = {
+    'Wagenpark Mobility Scan': [
+      'Wagenpark grootte', 'Huidig merk/model', 'Leasemaatschappij', 'Contractduur',
+      'Elektrisch / EV interesse', 'Laadinfrastructuur', 'CO₂ doelstelling',
+      'Budget range', 'Beslisser', 'Volgende stap', 'Offerte gewenst'
+    ],
+    'Intern Bezoekrapport': [
+      'Aanwezigen', 'Doel bezoek', 'Besproken punten', 'Klantproblemen',
+      'Concurrentie genoemd', 'Kansen', 'Risico\'s', 'Actiepunten', 'Follow-up datum'
+    ],
+    'Merk A Rapportage': [
+      'Dealer naam', 'Showroom kwaliteit', 'Voorraadniveau', 'Verkoopteam',
+      'Demo afspraken', 'Marketingactiviteiten', 'KPI score', 'Verbeterpunten', 'Afspraken gemaakt'
+    ],
+    'Klantensamenvatting': [
+      'Contactpersoon', 'Organisatie', 'Hoofdbehoefte', 'Tijdlijn',
+      'Budget', 'Besluitvorming', 'Volgende stap'
+    ]
+  };
+
+  function loadKeywordCheatsheet() {
+    // Find selected template name
+    const selectedCard = document.querySelector('.template-card.selected .template-card-name');
+    const templateName = selectedCard ? selectedCard.textContent.trim() : null;
+    const keywords = templateName && templateKeywords[templateName] ? templateKeywords[templateName] : null;
+
+    const cheatsheet = document.getElementById('keyword-cheatsheet');
+    const chipsEl = document.getElementById('keyword-chips');
+
+    if (!keywords) { cheatsheet.style.display = 'none'; return; }
+
+    cheatsheet.style.display = 'block';
+    chipsEl.innerHTML = '';
+    keywords.forEach(kw => {
+      const chip = document.createElement('span');
+      chip.className = 'kw-chip';
+      chip.textContent = kw;
+      chip.onclick = function() {
+        chip.classList.toggle('done');
+        updateKwProgress(keywords.length);
+      };
+      chipsEl.appendChild(chip);
+    });
+    updateKwProgress(keywords.length);
+  }
+
+  function updateKwProgress(total) {
+    const done = document.querySelectorAll('.kw-chip.done').length;
+    document.getElementById('kw-progress').textContent = done + ' / ' + total + ' afgevinkt';
+  }
+
+  function goToStep2() {
+    const company = document.getElementById('company-name').value;
+    if (!company) { showToast('⚠️ Vul de bedrijfsnaam in'); return; }
+    showWizardStep(2);
+    resetRecorder();
+    loadKeywordCheatsheet();
+  }
+  function goToStep3() { showWizardStep(3); }
+  function skipToReview() { showWizardStep(3); }
+
+  // Send row toggle
+  const sendRowLabels = {
+    'send-client': 'Klant', 'send-team': 'Team',
+    'send-self': 'Archief', 'send-whatsapp': 'WhatsApp', 'send-crm': 'CRM'
+  };
+  function toggleSendRow(id) {
+    const row = document.getElementById(id);
+    const detail = document.getElementById('detail-' + id);
+    row.classList.toggle('active');
+    detail.style.display = row.classList.contains('active') ? 'block' : 'none';
+    updateSendSummary();
+  }
+  function updateSendSummary() {
+    const active = Object.keys(sendRowLabels).filter(id => document.getElementById(id).classList.contains('active'));
+    const btn = document.getElementById('send-btn');
+    const summary = document.getElementById('send-summary-text');
+    if (active.length === 0) {
+      summary.textContent = 'Geen ontvangers geselecteerd';
+      btn.disabled = true; btn.style.opacity = '0.4';
+    } else {
+      summary.textContent = '📤 Versturen naar: ' + active.map(id => sendRowLabels[id]).join(', ');
+      btn.disabled = false; btn.style.opacity = '1';
+    }
+  }
+  function toggleChip(el) { el.classList.toggle('selected'); }
+  function sendReport() {
+    const active = Object.keys(sendRowLabels).filter(id => document.getElementById(id).classList.contains('active'));
+    showToast('✅ Rapport verstuurd naar: ' + active.map(id => sendRowLabels[id]).join(', '));
+  }
+
+  // ── AGENDA SLOT PICKER ──
+  let slotWeekOffset = { 'slots-bezoek': 0, 'slots-bellen': 0 };
+
+  async function loadSlots(containerId) {
+    const el = document.getElementById(containerId);
+    if (!el || el.dataset.loaded) return;
+    el.dataset.loaded = '1';
+    el.innerHTML = '<div class="slot-loading">📅 Agenda ophalen...</div>';
+
+    let busySlots = [];
+    try {
+      if (googleAccessToken) {
+        busySlots = await fetchBusyFromGoogle();
+      } else {
+        busySlots = getMockBusy();
+      }
+    } catch(e) {
+      busySlots = getMockBusy();
+    }
+    renderSlots(containerId, busySlots, slotWeekOffset[containerId]);
+  }
+
+  async function fetchBusyFromGoogle() {
+    const now = new Date();
+    const twoWeeks = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
+    const res = await fetch('https://www.googleapis.com/calendar/v3/freeBusy', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${googleAccessToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        timeMin: now.toISOString(),
+        timeMax: twoWeeks.toISOString(),
+        items: [{ id: 'primary' }]
+      })
+    });
+    const data = await res.json();
+    return (data.calendars?.primary?.busy || []).map(b => ({
+      start: new Date(b.start), end: new Date(b.end)
+    }));
+  }
+
+  function getMockBusy() {
+    // Realistic demo busy slots for coming days
+    const base = new Date(); base.setHours(0,0,0,0);
+    const busy = [];
+    [[1,9,10],[1,14,15.5],[2,10,11],[2,13,14],[3,9.5,11],[3,15,16],
+     [4,10,12],[4,14,15],[5,9,10],[6,10,11],[7,9,11],[7,14,15.5],
+     [8,10,11],[8,15,16],[9,9,10.5],[10,13,15]].forEach(([d,sh,eh]) => {
+      const s = new Date(base); s.setDate(base.getDate()+d); s.setHours(Math.floor(sh), (sh%1)*60);
+      const e = new Date(base); e.setDate(base.getDate()+d); e.setHours(Math.floor(eh), (eh%1)*60);
+      busy.push({start:s, end:e});
+    });
+    return busy;
+  }
+
+  function isBusy(date, hour, busySlots) {
+    const slotStart = new Date(date); slotStart.setHours(hour, 0, 0, 0);
+    const slotEnd   = new Date(date); slotEnd.setHours(hour + 1, 0, 0, 0);
+    return busySlots.some(b => b.start < slotEnd && b.end > slotStart);
+  }
+
+  function renderSlots(containerId, busySlots, weekOffset) {
+    const el = document.getElementById(containerId);
+    const days = ['Zo','Ma','Di','Wo','Do','Vr','Za'];
+    const months = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+    const workHours = [9, 10, 11, 13, 14, 15, 16];
+
+    const today = new Date(); today.setHours(0,0,0,0);
+    // Start from next Monday of current week + offset
+    const startDay = new Date(today);
+    const dow = today.getDay();
+    const daysToMon = dow === 0 ? 1 : (8 - dow) % 7 || 7;
+    startDay.setDate(today.getDate() + daysToMon + (weekOffset * 7));
+
+    const endDay = new Date(startDay); endDay.setDate(startDay.getDate() + 4); // Mon-Fri
+
+    const weekLabel = `${startDay.getDate()} ${months[startDay.getMonth()]} – ${endDay.getDate()} ${months[endDay.getMonth()]}`;
+
+    let html = `<div class="slot-week-nav">
+      <button onclick="changeSlotWeek('${containerId}',-1)">← Vorige</button>
+      <div class="slot-week-label">📅 Week van ${weekLabel}</div>
+      <button onclick="changeSlotWeek('${containerId}',1)">Volgende →</button>
+    </div>`;
+
+    for (let d = 0; d < 5; d++) {
+      const date = new Date(startDay); date.setDate(startDay.getDate() + d);
+      const label = `${days[date.getDay()]} ${date.getDate()} ${months[date.getMonth()]}`;
+      html += `<div class="slot-day-header">${label}</div><div class="slot-grid">`;
+      workHours.forEach(h => {
+        const busy = isBusy(date, h, busySlots);
+        const timeStr = `${String(h).padStart(2,'0')}:00`;
+        const isoStr = date.toISOString().slice(0,10);
+        if (busy) {
+          html += `<div class="slot-btn busy">${timeStr}</div>`;
+        } else {
+          html += `<div class="slot-btn" onclick="selectSlot('${containerId}','${label}','${timeStr}','${isoStr}T${timeStr}',this)">${timeStr}</div>`;
+        }
+      });
+      html += `</div>`;
+    }
+    el.innerHTML = html;
+  }
+
+  function changeSlotWeek(containerId, delta) {
+    slotWeekOffset[containerId] = (slotWeekOffset[containerId] || 0) + delta;
+    if (slotWeekOffset[containerId] < 0) slotWeekOffset[containerId] = 0;
+    // Re-render with existing busy data — re-fetch
+    const el = document.getElementById(containerId);
+    delete el.dataset.loaded;
+    loadSlots(containerId);
+  }
+
+  function selectSlot(containerId, dayLabel, timeStr, isoStr, btn) {
+    document.querySelectorAll(`#${containerId} .slot-btn`).forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+
+    const type = containerId.includes('bezoek') ? 'bezoek' : 'bellen';
+    const titleInput = containerId.includes('bezoek')
+      ? document.querySelector('#slots-bezoek')?.closest('.action-extra')?.querySelector('input[placeholder*="Titel"]')
+      : null;
+    const defaultTitle = type === 'bezoek'
+      ? (titleInput?.value || 'Vervolgbezoek — Eurofleet Solutions')
+      : 'Terugbellen — Eurofleet Solutions';
+    const durationMin = type === 'bezoek' ? 60 : 30;
+
+    // Parse ISO datetime
+    const startDt = new Date(isoStr.length === 10 ? isoStr + 'T' + timeStr + ':00' : isoStr);
+    const endDt = new Date(startDt.getTime() + durationMin * 60000);
+
+    const selectedEl = document.getElementById('selected-slot-' + containerId.replace('slots-',''));
+    if (selectedEl) {
+      selectedEl.style.display = 'block';
+      selectedEl.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--blue)">✅ ${dayLabel} om ${timeStr} — ${durationMin} min</div>
+            <div style="font-size:11px;color:var(--grey-600);margin-top:2px">${defaultTitle}</div>
+          </div>
+          <button class="btn btn-primary" style="font-size:12px;padding:7px 14px"
+            onclick="addSlotToCalendar('${encodeURIComponent(defaultTitle)}','${startDt.toISOString()}','${endDt.toISOString()}',this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Zet in agenda
+          </button>
+        </div>`;
+    }
+  }
+
+  async function addSlotToCalendar(encodedTitle, startIso, endIso, btn) {
+    const title = decodeURIComponent(encodedTitle);
+    btn.disabled = true;
+    btn.textContent = '⏳ Toevoegen...';
+
+    if (googleAccessToken) {
+      try {
+        const res = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${googleAccessToken}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            summary: title,
+            start: { dateTime: startIso },
+            end: { dateTime: endIso },
+            description: 'Aangemaakt via VisitFlow'
+          })
+        });
+        if (res.ok) {
+          btn.closest('[style]').innerHTML = `<div style="font-size:12px;font-weight:700;color:#2e7d32">📅 ✅ Toegevoegd aan Google Calendar!</div>`;
+          showToast('📅 Afspraak aangemaakt in Google Calendar');
+          return;
+        }
+      } catch(e) {}
+      showToast('⚠️ Kon niet toevoegen aan Google Calendar');
+      btn.disabled = false; btn.textContent = 'Zet in agenda';
+
+    } else if (window._outlookToken) {
+      try {
+        const res = await fetch('https://graph.microsoft.com/v1.0/me/events', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${window._outlookToken}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            subject: title,
+            start: { dateTime: startIso, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone },
+            end:   { dateTime: endIso,   timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone },
+            body:  { contentType: 'text', content: 'Aangemaakt via VisitFlow' }
+          })
+        });
+        if (res.ok) {
+          btn.closest('[style]').innerHTML = `<div style="font-size:12px;font-weight:700;color:#2e7d32">📅 ✅ Toegevoegd aan Outlook Calendar!</div>`;
+          showToast('📅 Afspraak aangemaakt in Outlook');
+          return;
+        }
+      } catch(e) {}
+      showToast('⚠️ Kon niet toevoegen aan Outlook');
+      btn.disabled = false; btn.textContent = 'Zet in agenda';
+
+    } else {
+      // No calendar connected — demo mode
+      setTimeout(() => {
+        btn.closest('[style]').innerHTML = `<div style="font-size:12px;font-weight:700;color:#2e7d32">📅 ✅ Toegevoegd aan agenda! <span style="font-weight:400;color:var(--grey-500)">(demo)</span></div>`;
+        showToast('📅 Afspraak aangemaakt (demo — koppel agenda voor echte sync)');
+      }, 800);
+    }
+  }
+
+  // Content library - custom items
+  function addCustomContent() {
+    const input = document.getElementById('custom-content-input');
+    const val = input.value.trim();
+    if (!val) return;
+    const list = document.getElementById('custom-content-list');
+    const isUrl = val.startsWith('http');
+    const item = document.createElement('label');
+    item.className = 'content-item';
+    item.innerHTML = `
+      <input type="checkbox" class="content-check" checked>
+      <div class="content-item-icon">${isUrl ? '🔗' : '📎'}</div>
+      <div style="flex:1">
+        <div class="content-item-title">${val}</div>
+        <div class="content-item-meta">${isUrl ? 'Link' : 'Eigen toevoeging'}</div>
+      </div>
+      <span onclick="this.closest('label').remove()" style="color:var(--grey-400);cursor:pointer;font-size:16px;padding:0 4px">×</span>`;
+    list.appendChild(item);
+    input.value = '';
+  }
+
+  // Template toggle
+  function toggleTemplate(card) {
+    card.classList.toggle('selected');
+  }
+
+  // Recording
+  let recording = false;
+  let timerInterval;
+  let seconds = 0;
+
+  function resetRecorder() {
+    recording = false;
+    seconds = 0;
+    document.getElementById('recordBtn').classList.remove('recording');
+    document.getElementById('timerDisplay').textContent = '0:00';
+    document.getElementById('recordStatus').textContent = 'Klik om te beginnen met opnemen';
+    document.getElementById('stopBtn').style.display = 'none';
+    document.getElementById('recording-ui').style.display = 'block';
+    document.getElementById('processing-ui').style.display = 'none';
+    clearInterval(timerInterval);
+  }
+
+  function toggleRecording() {
+    if (!recording) {
+      recording = true;
+      document.getElementById('recordBtn').classList.add('recording');
+      document.getElementById('recordStatus').textContent = '● Opname bezig...';
+      document.getElementById('stopBtn').style.display = 'inline-flex';
+      timerInterval = setInterval(() => {
+        seconds++;
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        document.getElementById('timerDisplay').textContent = m + ':' + (s < 10 ? '0' : '') + s;
+      }, 1000);
+    } else {
+      stopAndProcess();
+    }
+  }
+
+  function stopAndProcess() {
+    clearInterval(timerInterval);
+    recording = false;
+    document.getElementById('recording-ui').style.display = 'none';
+    document.getElementById('processing-ui').style.display = 'block';
+    // Simulate processing steps
+    setTimeout(() => {
+      document.getElementById('pstep1').className = 'processing-step done';
+      document.getElementById('pstep2').className = 'processing-step active';
+    }, 900);
+    setTimeout(() => {
+      document.getElementById('pstep2').className = 'processing-step done';
+      document.getElementById('pstep3').className = 'processing-step active';
+    }, 1800);
+    setTimeout(() => {
+      document.getElementById('pstep3').className = 'processing-step done';
+      showWizardStep(3);
+    }, 2700);
+  }
+
+  // Review
+  function toggleNeedsInput() {
+    const fields = document.getElementById('needsInputFields');
+    const chevron = document.getElementById('needsChevron');
+    fields.style.display = fields.style.display === 'none' ? 'block' : 'none';
+  }
+
+  function switchTab(idx) {
+    document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === idx));
+  }
+
+  // Export
+  function approveAndExport() {
+    showToast('📄 PDF gegenereerd en gedownload!');
+    setTimeout(() => { showWizardStep(4); }, 800);
+  }
+
+  // Actions
+  function toggleAction(card) {
+    card.classList.toggle('selected');
+  }
+
+  function finishVisit() {
+    showPage('dashboard');
+    setTimeout(() => showToast('✅ Bezoek afgerond! Acties toegevoegd aan dashboard.'), 300);
+  }
+
+  // Tasks
+  function markDone(check) {
+    check.style.background = 'var(--green)';
+    check.style.borderColor = 'var(--green)';
+    check.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" width="11" height="11"><polyline points="20 6 9 17 4 12"/></svg>';
+    check.parentElement.style.opacity = '0.5';
+    check.parentElement.style.textDecoration = 'line-through';
+    showToast('✓ Actie afgevinkt');
+  }
+
+
+  // ── GOOGLE CALENDAR API INTEGRATIE ──
+  // Vervang deze Client ID met jouw eigen Client ID uit Google Cloud Console
+  // ── GOOGLE CALENDAR CONFIG ──
+  const GOOGLE_CLIENT_ID = 'JOUW_GOOGLE_CLIENT_ID_HIER.apps.googleusercontent.com';
+  const CALENDAR_SCOPE = 'https://www.googleapis.com/auth/calendar.readonly';
+
+  // ── MICROSOFT OUTLOOK CONFIG ──
+  const MICROSOFT_CLIENT_ID = 'JOUW_MICROSOFT_CLIENT_ID_HIER';
+  const MICROSOFT_AUTHORITY = 'https://login.microsoftonline.com/common';
+  const GRAPH_SCOPES = ['Calendars.Read', 'User.Read'];
+  let msalInstance = null;
+
+  let googleAccessToken = null;
+  let activeCalEvent = null;
+  let allCalEvents = [];
+
+  // Mock data als fallback (voor demo zonder API key)
+  const mockCalEvents = [
+    { time: '14:30', date: 'Vr 20 feb', isoDate: '2026-02-20', company: 'Eurofleet Solutions BV', contact: 'Marcus Weber', allAttendees: ['Marcus Weber', 'Sarah Janssen', 'Tom de Bruin'], extraAttendees: ['Sarah Janssen', 'Tom de Bruin'], location: 'Amsterdam HQ', duration: '1u', title: 'Eurofleet Solutions BV — Wagenpark gesprek', color: 'blue' },
+    { time: '10:00', date: 'Vr 20 feb', isoDate: '2026-02-20', company: 'Intern standup', contact: 'Team Fleet Sales', allAttendees: ['Team Fleet Sales'], extraAttendees: [], location: 'Teams call', duration: '30min', title: 'Intern standup Fleet Sales', color: 'green' },
+    { time: '09:00', date: 'Vr 20 feb', isoDate: '2026-02-20', company: 'Iberia Movilidad SL', contact: 'Carlos Ruiz', allAttendees: ['Carlos Ruiz', 'Elena Morales'], extraAttendees: ['Elena Morales'], location: 'Madrid', duration: '2u', title: 'Iberia Movilidad SL — Intro gesprek', color: 'blue' },
+    { time: '15:00', date: 'Do 19 feb', isoDate: '2026-02-19', company: 'NordLog Transport AS', contact: 'Ingrid Haugen', allAttendees: ['Ingrid Haugen'], extraAttendees: [], location: 'Oslo Office', duration: '45min', title: 'NordLog Transport AS — Follow-up', color: 'blue' },
+    { time: '11:00', date: 'Do 19 feb', isoDate: '2026-02-19', company: 'Van Dijke Fleet Management', contact: 'Petra van Dijke', allAttendees: ['Petra van Dijke', 'Klaas Mulder'], extraAttendees: ['Klaas Mulder'], location: 'Rotterdam', duration: '1u 30min', title: 'Van Dijke Fleet Management — Demo', color: 'amber' },
+    { time: '13:30', date: 'Di 17 feb', isoDate: '2026-02-17', company: 'MobiStart GmbH', contact: 'Klaus Bauer', allAttendees: ['Klaus Bauer', 'Anna Schmidt', 'Peter Wolff'], extraAttendees: ['Anna Schmidt', 'Peter Wolff'], location: 'Frankfurt', duration: '2u', title: 'MobiStart GmbH — Wagenpark scan', color: 'blue' },
+  ];
+
+  function initCalendar() {
+    // Check of Google API al geladen is
+    if (GOOGLE_CLIENT_ID !== 'JOUW_CLIENT_ID_HIER.apps.googleusercontent.com' && typeof google !== 'undefined') {
+      showGoogleConnectButton();
+    } else {
+      // Gebruik mock data voor demo
+      loadMockCalendar();
+    }
+  }
+
+  function showGoogleConnectButton() {
+    const suggestion = document.getElementById('calSuggestion');
+    suggestion.innerHTML = `
+      <div class="cal-suggestion-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Agenda koppeling — kies je platform
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0">
+        <div style="background:rgba(255,255,255,0.1);border-radius:10px;padding:14px;cursor:pointer;border:2px solid transparent;transition:all 0.15s" onmouseover="this.style.borderColor='rgba(255,255,255,0.4)'" onmouseout="this.style.borderColor='transparent'" onclick="connectGoogleCalendar()">
+          <div style="font-size:22px;margin-bottom:6px">🗓️</div>
+          <div style="font-size:13px;font-weight:700;color:white">Google Calendar</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:2px">Gmail / Google Workspace</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.1);border-radius:10px;padding:14px;cursor:pointer;border:2px solid transparent;transition:all 0.15s" onmouseover="this.style.borderColor='rgba(255,255,255,0.4)'" onmouseout="this.style.borderColor='transparent'" onclick="connectOutlookCalendar()">
+          <div style="font-size:22px;margin-bottom:6px">📆</div>
+          <div style="font-size:13px;font-weight:700;color:white">Outlook Calendar</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:2px">Microsoft 365 / Outlook.com</div>
+        </div>
+      </div>
+      <div class="cal-actions">
+        <button class="btn-cal-other" onclick="loadMockCalendar()">Demo data gebruiken</button>
+      </div>
+    `;
+  }
+
+  function connectGoogleCalendar() {
+    if (typeof google === 'undefined') {
+      showToast('⚠️ Google API niet geladen. Controleer je Client ID.');
+      loadMockCalendar();
+      return;
+    }
+    const client = google.accounts.oauth2.initTokenClient({
+      client_id: GOOGLE_CLIENT_ID,
+      scope: CALENDAR_SCOPE,
+      callback: (response) => {
+        if (response.access_token) {
+          googleAccessToken = response.access_token;
+          fetchGoogleCalendarEvents();
+        }
+      },
+    });
+    client.requestAccessToken();
+  }
+
+  async function fetchGoogleCalendarEvents() {
+    showToast('📅 Agenda ophalen...');
+    try {
+      const now = new Date();
+      const sevenDaysAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
+      const url = `https://www.googleapis.com/calendar/v3/calendars/primary/events?` +
+        `timeMin=${sevenDaysAgo.toISOString()}&` +
+        `timeMax=${now.toISOString()}&` +
+        `singleEvents=true&orderBy=startTime&maxResults=20`;
+
+      const response = await fetch(url, {
+        headers: { Authorization: `Bearer ${googleAccessToken}` }
+      });
+      const data = await response.json();
+
+      if (data.items && data.items.length > 0) {
+        allCalEvents = parseGoogleEvents(data.items);
+        loadCalendarUI(allCalEvents);
+        showToast(`✅ ${allCalEvents.length} afspraken gevonden`);
+      } else {
+        showToast('Geen afspraken gevonden, demo data geladen');
+        loadMockCalendar();
+      }
+    } catch (err) {
+      console.error('Calendar fetch error:', err);
+      showToast('⚠️ Fout bij ophalen agenda. Demo data geladen.');
+      loadMockCalendar();
+    }
+  }
+
+  function parseGoogleEvents(items) {
+    const days = ['Zo', 'Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za'];
+    const months = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+    return items.map(item => {
+      const start = item.start.dateTime ? new Date(item.start.dateTime) : new Date(item.start.date);
+      const end = item.end.dateTime ? new Date(item.end.dateTime) : new Date(item.end.date);
+      const durationMs = end - start;
+      const durationMin = Math.round(durationMs / 60000);
+      const durationStr = durationMin >= 60
+        ? `${Math.floor(durationMin/60)}u${durationMin%60 ? ' '+durationMin%60+'min' : ''}`
+        : `${durationMin}min`;
+
+      // Extract ALL non-self attendees
+      const rawAttendees = (item.attendees || []).filter(a => !a.self);
+      const allAttendees = rawAttendees.map(a => a.displayName || a.email || '').filter(Boolean);
+      const contact = allAttendees[0] || '';
+      const extraAttendees = allAttendees.slice(1);
+
+      return {
+        time: start.toTimeString().slice(0,5),
+        date: `${days[start.getDay()]} ${start.getDate()} ${months[start.getMonth()]}`,
+        isoDate: start.toISOString().slice(0,10),
+        company: item.summary || 'Geen titel',
+        contact: contact,
+        allAttendees: allAttendees,
+        extraAttendees: extraAttendees,
+        location: item.location || '',
+        duration: durationStr,
+        title: item.summary || 'Geen titel',
+        color: 'blue',
+        raw: item
+      };
+    }).reverse(); // Meest recent eerst
+  }
+
+  function loadMockCalendar() {
+    allCalEvents = mockCalEvents;
+    loadCalendarUI(mockCalEvents);
+  }
+
+  function loadCalendarUI(events) {
+    if (!events || events.length === 0) { loadMockCalendar(); return; }
+    const e = events[0]; // Meest recente afspraak
+    activeCalEvent = e;
+    const suggestion = document.getElementById('calSuggestion');
+    suggestion.innerHTML = `
+      <div class="cal-suggestion-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Meest recente afspraak uit je agenda ${googleAccessToken ? '• <span style="color:rgba(255,255,255,0.5)">Live via Google Calendar</span>' : '• <span style="color:rgba(255,255,255,0.4)">Demo data</span>'}
+      </div>
+      <div class="cal-event">
+        <div class="cal-event-time">
+          <div class="cal-event-time-hour">${e.time}</div>
+          <div class="cal-event-time-ampm">${e.date}</div>
+        </div>
+        <div class="cal-event-info">
+          <div class="cal-event-title">${e.title}</div>
+          <div class="cal-event-meta">
+            ${e.contact ? `<span>👤 ${e.contact}</span> &nbsp;·&nbsp;` : ''}
+            ${e.location ? `<span>📍 ${e.location}</span> &nbsp;·&nbsp;` : ''}
+            <span>⏱ ${e.duration}</span>
+          </div>
+        </div>
+      </div>
+      <div class="cal-actions">
+        <button class="btn-cal-use" onclick="useCalendarEvent()">✓ Gebruik deze afspraak</button>
+        <button class="btn-cal-other" onclick="openCalModal()">↕ Andere afspraak kiezen</button>
+        ${googleAccessToken ? '<button class="btn-cal-other" onclick="fetchGoogleCalendarEvents()">↻ Vernieuwen</button>' : ''}
+      </div>
+    `;
+    // Also update the modal list
+    updateCalModalList(events);
+  }
+
+  function updateCalModalList(events) {
+    const list = document.querySelector('.cal-list');
+    if (!list) return;
+    list.innerHTML = '';
+    let lastDate = '';
+    events.forEach((e, i) => {
+      if (e.date !== lastDate) {
+        const sep = document.createElement('div');
+        sep.className = 'cal-section-label';
+        sep.textContent = e.date;
+        list.appendChild(sep);
+        lastDate = e.date;
+      }
+      const allAttendeesEncoded = encodeURIComponent(JSON.stringify(e.allAttendees || (e.contact ? [e.contact] : [])));
+      const attendeeSub = e.allAttendees && e.allAttendees.length > 1
+        ? e.allAttendees.join(', ')
+        : (e.contact || '');
+      const div = document.createElement('div');
+      div.className = 'cal-list-item' + (i===0 ? ' suggested' : '');
+      div.innerHTML = `
+        <div class="cal-list-dot ${e.color||'blue'}"></div>
+        <div class="cal-list-time">${e.time}</div>
+        <div class="cal-list-info">
+          <div class="cal-list-title">${e.title}</div>
+          <div class="cal-list-sub">${[attendeeSub, e.location, e.duration].filter(Boolean).join(' · ')}</div>
+        </div>
+        ${i===0 ? '<span class="cal-list-badge badge badge-blue">Meest recent</span>' : ''}
+      `;
+      div.addEventListener('click', () => selectCalEvent(div,
+        e.company, e.contact, e.location, e.time, e.isoDate, e.duration, allAttendeesEncoded
+      ));
+      list.appendChild(div);
+    });
+  }
+
+  function useCalendarEvent() {
+    fillFromEvent(activeCalEvent);
+    showToast('📅 Gegevens overgenomen uit agenda');
+  }
+
+  function fillFromEvent(e) {
+    document.getElementById('company-name').value = e.company || '';
+    document.getElementById('contact-name').value = e.contact || '';
+    document.getElementById('visit-location').value = e.location || '';
+    document.getElementById('visit-date').value = e.isoDate || '';
+
+    // Fill extra attendees — all attendees except the first (contact)
+    const extraField = document.getElementById('attendees');
+    if (e.extraAttendees && e.extraAttendees.length > 0) {
+      extraField.value = e.extraAttendees.join(', ');
+    } else if (e.allAttendees && e.allAttendees.length > 1) {
+      extraField.value = e.allAttendees.slice(1).join(', ');
+    } else {
+      extraField.value = '';
+    }
+
+    document.getElementById('calFilledBadge').style.display = 'inline-flex';
+
+    // Highlight filled fields briefly
+    const fieldsToHighlight = ['company-name','contact-name','visit-location','visit-date'];
+    if (extraField.value) fieldsToHighlight.push('attendees');
+    fieldsToHighlight.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.style.borderColor = 'var(--green)';
+      el.style.background = 'var(--green-pale)';
+      setTimeout(() => { el.style.borderColor = ''; el.style.background = ''; }, 2000);
+    });
+  }
+
+  function openCalModal() {
+    document.getElementById('calModalOverlay').classList.add('open');
+  }
+
+  function closeCalModal(e) {
+    if (e.target === document.getElementById('calModalOverlay')) {
+      document.getElementById('calModalOverlay').classList.remove('open');
+    }
+  }
+
+  function closeCalModalDirect() {
+    document.getElementById('calModalOverlay').classList.remove('open');
+  }
+
+  function selectCalEvent(el, company, contact, location, time, isoDate, duration, allAttendeesJson) {
+    let allAttendees = [];
+    try { allAttendees = allAttendeesJson ? JSON.parse(decodeURIComponent(allAttendeesJson)) : (contact ? [contact] : []); } catch(e) { allAttendees = contact ? [contact] : []; }
+    const extraAttendees = allAttendees.slice(1);
+    const e = { company, contact, location, time, isoDate, duration, date: isoDate, title: company, allAttendees, extraAttendees };
+    activeCalEvent = e;
+    // Update suggestion card
+    document.getElementById('calTime').textContent = time;
+    document.getElementById('calTitle').textContent = company + (contact ? ' — ' + contact : '');
+    document.getElementById('calContact').textContent = contact;
+    document.getElementById('calLocation').textContent = location;
+    document.getElementById('calDuration').textContent = duration;
+    closeCalModalDirect();
+    fillFromEvent(e);
+    showToast('📅 Afspraak geselecteerd: ' + company);
+  }
+
+
+  // ── MICROSOFT OUTLOOK CALENDAR INTEGRATIE ──
+  function connectOutlookCalendar() {
+    if (MICROSOFT_CLIENT_ID === 'JOUW_MICROSOFT_CLIENT_ID_HIER') {
+      showToast('⚠️ Voeg eerst je Microsoft Client ID toe aan de app');
+      loadMockCalendar();
+      return;
+    }
+    if (typeof msal === 'undefined') {
+      showToast('⚠️ MSAL bibliotheek niet geladen');
+      loadMockCalendar();
+      return;
+    }
+    try {
+      msalInstance = new msal.PublicClientApplication({
+        auth: {
+          clientId: MICROSOFT_CLIENT_ID,
+          authority: MICROSOFT_AUTHORITY,
+          redirectUri: window.location.href.split('?')[0],
+        },
+        cache: { cacheLocation: 'sessionStorage' }
+      });
+      msalInstance.loginPopup({ scopes: GRAPH_SCOPES })
+        .then(response => {
+          showToast('✅ Ingelogd bij Microsoft — agenda ophalen...');
+          return msalInstance.acquireTokenSilent({ scopes: GRAPH_SCOPES, account: response.account });
+        })
+        .then(tokenResponse => {
+          window._outlookToken = tokenResponse.accessToken;
+          fetchOutlookCalendarEvents(tokenResponse.accessToken);
+        })
+        .catch(err => {
+          console.error('MSAL error:', err);
+          showToast('⚠️ Inloggen mislukt. Demo data geladen.');
+          loadMockCalendar();
+        });
+    } catch(e) {
+      console.error(e);
+      showToast('⚠️ Fout bij verbinden. Demo data geladen.');
+      loadMockCalendar();
+    }
+  }
+
+  async function fetchOutlookCalendarEvents(accessToken) {
+    showToast('📆 Outlook agenda ophalen...');
+    try {
+      const now = new Date();
+      const sevenDaysAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
+      const url = `https://graph.microsoft.com/v1.0/me/calendarView?` +
+        `startDateTime=${sevenDaysAgo.toISOString()}&` +
+        `endDateTime=${now.toISOString()}&` +
+        `$select=subject,start,end,location,attendees,organizer&` +
+        `$orderby=start/dateTime desc&$top=20`;
+
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      const data = await response.json();
+
+      if (data.value && data.value.length > 0) {
+        const events = parseOutlookEvents(data.value);
+        loadCalendarUI(events);
+        showToast(`✅ ${events.length} Outlook afspraken gevonden`);
+      } else {
+        showToast('Geen Outlook afspraken gevonden, demo data geladen');
+        loadMockCalendar();
+      }
+    } catch(err) {
+      console.error('Graph API error:', err);
+      showToast('⚠️ Fout bij ophalen Outlook agenda. Demo data geladen.');
+      loadMockCalendar();
+    }
+  }
+
+  function parseOutlookEvents(items) {
+    const days = ['Zo','Ma','Di','Wo','Do','Vr','Za'];
+    const months = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+    return items.map(item => {
+      const start = new Date(item.start.dateTime + (item.start.timeZone === 'UTC' ? 'Z' : ''));
+      const end = new Date(item.end.dateTime + (item.end.timeZone === 'UTC' ? 'Z' : ''));
+      const durationMin = Math.round((end - start) / 60000);
+      const durationStr = durationMin >= 60
+        ? `${Math.floor(durationMin/60)}u${durationMin%60 ? ' '+durationMin%60+'min' : ''}`
+        : `${durationMin}min`;
+
+      // Extract ALL required attendees, exclude organizer/self
+      const rawAttendees = (item.attendees || []).filter(a =>
+        a.type === 'required' &&
+        a.emailAddress?.name !== item.organizer?.emailAddress?.name
+      );
+      const allAttendees = rawAttendees.map(a => a.emailAddress?.name || a.emailAddress?.address || '').filter(Boolean);
+      const contact = allAttendees[0] || '';
+      const extraAttendees = allAttendees.slice(1);
+
+      return {
+        time: start.toTimeString().slice(0,5),
+        date: `${days[start.getDay()]} ${start.getDate()} ${months[start.getMonth()]}`,
+        isoDate: start.toISOString().slice(0,10),
+        company: item.subject || 'Geen titel',
+        contact: contact,
+        allAttendees: allAttendees,
+        extraAttendees: extraAttendees,
+        location: item.location?.displayName || '',
+        duration: durationStr,
+        title: item.subject || 'Geen titel',
+        color: 'blue',
+        raw: item
+      };
+    });
+  }
+
+  // Init calendar on load
+  window.addEventListener('DOMContentLoaded', initCalendar);
+  // Toast
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.display = 'block';
+    setTimeout(() => { t.style.display = 'none'; }, 3000);
+  }
+</script>
+
+<!-- CALENDAR PICKER MODAL -->
+<div class="cal-modal-overlay" id="calModalOverlay" onclick="closeCalModal(event)">
+  <div class="cal-modal">
+    <div class="cal-modal-header">
+      <div class="cal-modal-title">📅 Kies een afspraak</div>
+      <button class="cal-modal-close" onclick="closeCalModalDirect()">✕</button>
+    </div>
+    <div class="cal-list">
+      <div class="cal-section-label">Vandaag — vrijdag 20 februari 2026</div>
+      <div class="cal-list-item suggested" onclick="selectCalEvent(this, 'Eurofleet Solutions BV', 'Marcus Weber', 'Amsterdam HQ', '14:30', '20-02-2026', '1u')">
+        <div class="cal-list-dot blue"></div>
+        <div class="cal-list-time">14:30</div>
+        <div class="cal-list-info">
+          <div class="cal-list-title">Eurofleet Solutions BV — Wagenpark gesprek</div>
+          <div class="cal-list-sub">Marcus Weber · Amsterdam HQ · 1u</div>
+        </div>
+        <span class="cal-list-badge badge badge-blue">Meest recent</span>
+      </div>
+      <div class="cal-list-item" onclick="selectCalEvent(this, 'Intern standup', 'Team Fleet Sales', 'Teams call', '10:00', '20-02-2026', '30min')">
+        <div class="cal-list-dot green"></div>
+        <div class="cal-list-time">10:00</div>
+        <div class="cal-list-info">
+          <div class="cal-list-title">Intern standup Fleet Sales</div>
+          <div class="cal-list-sub">Team Fleet Sales · Teams call · 30min</div>
+        </div>
+      </div>
+      <div class="cal-list-item" onclick="selectCalEvent(this, 'Iberia Movilidad SL', 'Carlos Ruiz', 'Madrid', '09:00', '20-02-2026', '2u')">
+        <div class="cal-list-dot blue"></div>
+        <div class="cal-list-time">09:00</div>
+        <div class="cal-list-info">
+          <div class="cal-list-title">Iberia Movilidad SL — Intro gesprek</div>
+          <div class="cal-list-sub">Carlos Ruiz · Madrid · 2u</div>
+        </div>
+      </div>
+      <div class="cal-section-label">Gisteren — donderdag 19 februari</div>
+      <div class="cal-list-item" onclick="selectCalEvent(this, 'NordLog Transport AS', 'Ingrid Haugen', 'Oslo Office', '15:00', '19-02-2026', '45min')">
+        <div class="cal-list-dot blue"></div>
+        <div class="cal-list-time">15:00</div>
+        <div class="cal-list-info">
+          <div class="cal-list-title">NordLog Transport AS — Follow-up</div>
+          <div class="cal-list-sub">Ingrid Haugen · Oslo Office · 45min</div>
+        </div>
+      </div>
+      <div class="cal-list-item" onclick="selectCalEvent(this, 'Van Dijke Fleet Management', 'Petra van Dijke', 'Rotterdam', '11:00', '19-02-2026', '1u 30min')">
+        <div class="cal-list-dot amber"></div>
+        <div class="cal-list-time">11:00</div>
+        <div class="cal-list-info">
+          <div class="cal-list-title">Van Dijke Fleet Management — Demo</div>
+          <div class="cal-list-sub">Petra van Dijke · Rotterdam · 1u 30min</div>
+        </div>
+      </div>
+      <div class="cal-section-label">Eerder deze week</div>
+      <div class="cal-list-item" onclick="selectCalEvent(this, 'MobiStart GmbH', 'Klaus Bauer', 'Frankfurt', '13:30', '17-02-2026', '2u')">
+        <div class="cal-list-dot blue"></div>
+        <div class="cal-list-time">13:30</div>
+        <div class="cal-list-info">
+          <div class="cal-list-title">MobiStart GmbH — Wagenpark scan</div>
+          <div class="cal-list-sub">Klaus Bauer · Frankfurt · 2u</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SIDEBAR OVERLAY -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<!-- MOBILE BOTTOM NAV -->
+<nav class="mobile-nav" id="mobileNav">
+  <div class="mobile-nav-item" onclick="showPage('dashboard')" id="mnav-dashboard">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+    Dashboard
+  </div>
+  <div class="mobile-nav-item active" onclick="showPage('new-visit')" id="mnav-new-visit">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+    Nieuw
+  </div>
+  <div class="mobile-nav-item" onclick="showPage('reports')" id="mnav-reports">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    Rapporten
+  </div>
+  <div class="mobile-nav-item" onclick="showPage('settings')" id="mnav-settings">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41M21 12h-2M5 12H3M12 21v-2M12 5V3"/></svg>
+    Instellingen
+  </div>
+</nav>
+
+<script>
+  function closeSidebar() {
+    document.querySelector('.sidebar').classList.remove('open');
+    const overlay = document.getElementById('sidebarOverlay');
+    if (overlay) overlay.classList.remove('open');
+  }
+
+  function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    const isOpen = sidebar.classList.toggle('open');
+    if (overlay) overlay.classList.toggle('open', isOpen);
+  }
+
+  // Close sidebar when any nav item is clicked on mobile
+  document.querySelectorAll('.sidebar-nav .nav-item, .sidebar-nav .nav-section-label').forEach(el => {
+    el.addEventListener('click', () => {
+      if (window.innerWidth < 768) closeSidebar();
+    });
+  });
+</script></body></html>
