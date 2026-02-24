@@ -896,7 +896,7 @@
         <div class="card" style="margin-bottom:16px">
           <div style="padding:16px 20px">
             <div style="font-size:13px;color:var(--grey-600);margin-bottom:8px;font-weight:600">📝 Transcript</div>
-            <div class="transcript-box">"Bezocht Eurofleet Solutions in Amsterdam. Gesproken met Marcus Weber, fleet manager, en Sarah Janssen van inkoop. Ze hebben momenteel 47 bedrijfsauto's en 12 bestelwagens. Voornamelijk lease bij Athlon. Rijden nu BMW en Volkswagen. Overwegen elektrisch voor de volgende cyclus. 8 laadpalen op eigen terrein. Interesse in ons Private Lease aanbod voor management. Graag offerte voor 15 voertuigen. Volgende afspraak over 3 weken inplannen."</div>
+            <div class="transcript-box" id="transcript-text">"Bezocht Eurofleet Solutions in Amsterdam. Gesproken met Marcus Weber, fleet manager, en Sarah Janssen van inkoop. Ze hebben momenteel 47 bedrijfsauto's en 12 bestelwagens. Voornamelijk lease bij Athlon. Rijden nu BMW en Volkswagen. Overwegen elektrisch voor de volgende cyclus. 8 laadpalen op eigen terrein. Interesse in ons Private Lease aanbod voor management. Graag offerte voor 15 voertuigen. Volgende afspraak over 3 weken inplannen."</div>
           </div>
         </div>
         <div class="card" style="margin-bottom:16px">
@@ -914,19 +914,19 @@
                 <div id="needsInputFields">
                   <div class="field-row amber-field">
                     <div class="field-label">Criteria besluitvorming</div>
-                    <input type="text" placeholder="Niet vermeld in debrief..." style="border-color:var(--amber);background:white">
+                    <input type="text" id="rv-criteria-besluit" placeholder="Niet vermeld in debrief..." style="border-color:var(--amber);background:white">
                   </div>
                   <div class="field-row amber-field">
                     <div class="field-label">Autoregeling aanwezig</div>
-                    <select style="border-color:var(--amber);background:white"><option value="">Selecteer...</option><option>ja</option><option>nee</option></select>
+                    <select id="rv-autoregeling-aanwezig" style="border-color:var(--amber);background:white"><option value="">Selecteer...</option><option>ja</option><option>nee</option></select>
                   </div>
                   <div class="field-row amber-field">
                     <div class="field-label">Vaste partners schadeherstel</div>
-                    <select style="border-color:var(--amber);background:white"><option value="">Selecteer...</option><option>ja</option><option>nee</option></select>
+                    <select id="rv-schadeherstel" style="border-color:var(--amber);background:white"><option value="">Selecteer...</option><option>ja</option><option>nee</option></select>
                   </div>
                   <div class="field-row amber-field">
                     <div class="field-label">Verhouding brandstof/hybride/elektrisch</div>
-                    <input type="text" placeholder="Niet vermeld in debrief..." style="border-color:var(--amber);background:white">
+                    <input type="text" id="rv-brandstof-mix" placeholder="Niet vermeld in debrief..." style="border-color:var(--amber);background:white">
                   </div>
                 </div>
               </div>
@@ -935,11 +935,11 @@
               <div class="form-grid">
                 <div class="field-row">
                   <div class="field-label">Aantal vestigingen <span class="voice-badge">🎙 voice</span></div>
-                  <input type="number" value="3">
+                  <input type="number" id="rv-vestigingen" value="3">
                 </div>
                 <div class="field-row">
                   <div class="field-label">Aantal medewerkers <span class="voice-badge">🎙 voice</span></div>
-                  <input type="number" value="180">
+                  <input type="number" id="rv-medewerkers" value="180">
                 </div>
               </div>
 
@@ -947,15 +947,15 @@
               <div class="form-grid">
                 <div class="field-row">
                   <div class="field-label">Rol contactpersoon <span class="voice-badge">🎙 voice</span></div>
-                  <select><option>beslisser</option><option>beïnvloeder</option></select>
+                  <select id="rv-rol-contact"><option>beslisser</option><option>beïnvloeder</option></select>
                 </div>
                 <div class="field-row">
                   <div class="field-label">Wie neemt beslissingen wagenpark <span class="voice-badge">🎙 voice</span></div>
-                  <input type="text" value="Marcus Weber (fleet manager)">
+                  <input type="text" id="rv-beslisser" value="Marcus Weber (fleet manager)">
                 </div>
                 <div class="field-row">
                   <div class="field-label">Invloed berijder op aankoop <span class="voice-badge">🎙 voice</span></div>
-                  <select><option>enige</option><option>geen</option><option>alle</option></select>
+                  <select id="rv-invloed-berijder"><option>enige</option><option>geen</option><option>alle</option></select>
                 </div>
               </div>
 
@@ -963,27 +963,27 @@
               <div class="form-grid">
                 <div class="field-row">
                   <div class="field-label">Aantal personenwagens <span class="voice-badge">🎙 voice</span></div>
-                  <input type="number" value="47">
+                  <input type="number" id="rv-pw-aantal" value="47">
                 </div>
                 <div class="field-row">
                   <div class="field-label">Primaire merken <span class="voice-badge">🎙 voice</span></div>
-                  <input type="text" value="BMW, Volkswagen">
+                  <input type="text" id="rv-merken" value="BMW, Volkswagen">
                 </div>
                 <div class="field-row">
                   <div class="field-label">Koop of lease <span class="voice-badge">🎙 voice</span></div>
-                  <select><option>lease</option><option>koop</option></select>
+                  <select id="rv-koop-lease"><option>lease</option><option>koop</option></select>
                 </div>
                 <div class="field-row">
                   <div class="field-label">Aantal bedrijfswagens <span class="voice-badge">🎙 voice</span></div>
-                  <input type="number" value="12">
+                  <input type="number" id="rv-bw-aantal" value="12">
                 </div>
                 <div class="field-row">
                   <div class="field-label">Aantal laadpalen eigen terrein <span class="voice-badge">🎙 voice</span></div>
-                  <input type="number" value="8">
+                  <input type="number" id="rv-laadpalen" value="8">
                 </div>
                 <div class="field-row">
                   <div class="field-label">Wagenpark beheertool <span class="voice-badge">🎙 voice</span></div>
-                  <input type="text" value="Athlon portal">
+                  <input type="text" id="rv-beheertool" value="Athlon portal">
                 </div>
               </div>
 
@@ -991,28 +991,28 @@
               <div class="form-grid">
                 <div class="field-row">
                   <div class="field-label">Voorstel doen naar aanleiding scan <span class="voice-badge">🎙 voice</span></div>
-                  <select><option>ja</option><option>nee</option></select>
+                  <select id="rv-voorstel"><option>ja</option><option>nee</option></select>
                 </div>
                 <div class="field-row">
                   <div class="field-label">Criteria nieuwe personenwagens <span class="voice-badge">🎙 voice</span></div>
-                  <input type="text" value="Elektrisch, laag TCO, comfort">
+                  <input type="text" id="rv-criteria-pw" value="Elektrisch, laag TCO, comfort">
                 </div>
               </div>
 
               <div class="section-title">Volgende actie</div>
               <div class="form-grid">
                 <div class="field-row">
-                  <div class="field-label"><input type="checkbox" checked style="width:auto;padding:0;border:none;box-shadow:none"> Plan nieuwe afspraak</div>
-                  <input type="date" value="2026-03-12">
+                  <div class="field-label"><input type="checkbox" id="rv-plan-afspraak" checked style="width:auto;padding:0;border:none;box-shadow:none"> Plan nieuwe afspraak</div>
+                  <input type="date" id="rv-volgende-datum" value="2026-03-12">
                 </div>
                 <div class="field-row">
                   <div class="field-label">Notities</div>
-                  <input type="text" value="Offerte 15 voertuigen meenemen">
+                  <input type="text" id="rv-notities" value="Offerte 15 voertuigen meenemen">
                 </div>
               </div>
 
               <div class="section-title">Opmerkingen (automatisch ingevuld)</div>
-              <textarea rows="4">Klant overweegt elektrisch voor volgende wagenparkcyclus. Sarah Janssen van inkoop aanwezig — interesse in Private Lease aanbod voor management (15 voertuigen). Rijden nu Athlon als leasemaatschappij.</textarea>
+              <textarea id="rv-opmerkingen" rows="4">Klant overweegt elektrisch voor volgende wagenparkcyclus. Sarah Janssen van inkoop aanwezig — interesse in Private Lease aanbod voor management (15 voertuigen). Rijden nu Athlon als leasemaatschappij.</textarea>
 
               <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--grey-100)">
                 <div style="font-size:12px;font-weight:600;color:var(--grey-600);margin-bottom:10px">Aanwezigen</div>
@@ -1192,7 +1192,7 @@
           <div class="card-header"><span class="card-title">Volgende acties</span><span class="text-xs text-muted">Selecteer 1 of meer</span></div>
           <div style="padding:20px">
             <div class="action-grid">
-              <div class="action-card selected" onclick="toggleAction(this)">
+              <div class="action-card selected" onclick="toggleAction(this)" data-action="offerte-voorbereiden">
                 <div class="action-icon">
                   <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                 </div>
@@ -1204,7 +1204,7 @@
                   </div>
                 </div>
               </div>
-              <div class="action-card" onclick="toggleAction(this);loadSlots('slots-bezoek')" style="grid-column:1/-1">
+              <div class="action-card" onclick="toggleAction(this);loadSlots('slots-bezoek')" data-action="bezoek-inplannen" style="grid-column:1/-1">
                 <div class="action-icon">
                   <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                 </div>
@@ -1224,7 +1224,7 @@
                 </div>
               </div>
 
-              <div class="action-card" onclick="toggleAction(this);loadSlots('slots-bellen')" style="grid-column:1/-1">
+              <div class="action-card" onclick="toggleAction(this);loadSlots('slots-bellen')" data-action="terugbellen" style="grid-column:1/-1">
                 <div class="action-icon">
                   <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.01 1.17 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.06 6.06l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92z"/></svg>
                 </div>
@@ -1242,7 +1242,7 @@
                   </div>
                 </div>
               </div>
-              <div class="action-card" onclick="toggleAction(this)" style="grid-column:1/-1">
+              <div class="action-card" onclick="toggleAction(this)" data-action="info-sturen" style="grid-column:1/-1">
                 <div class="action-icon">
                   <svg viewBox="0 0 24 24"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z"/></svg>
                 </div>
@@ -1313,7 +1313,7 @@
                   </div>
                 </div>
               </div>
-              <div class="action-card" onclick="toggleAction(this)" style="grid-column:1/-1">
+              <div class="action-card" onclick="toggleAction(this)" data-action="linkedin-verbinden" style="grid-column:1/-1">
                 <div class="action-icon" style="background:#E7F0F9">
                   <svg viewBox="0 0 24 24" style="stroke:#0A66C2"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
                 </div>
@@ -1842,14 +1842,29 @@
     card.classList.toggle('selected');
   }
 
-  // Recording
+  // ── VOICE VERWERKING — MediaRecorder → Make → Whisper → Claude ──────────
+  // Stap 1: Browser neemt op via MediaRecorder
+  // Stap 2: Audio wordt als base64 naar Make webhook gestuurd
+  // Stap 3: Make stuurt naar Whisper (transcriptie) → Claude (velden invullen)
+  // Stap 4: Make stuurt JSON terug → app vult stap 3 automatisch in
+  //
+  // MAKE WEBHOOK URLS — vul jouw eigen URLs in:
+  const MAKE_VOICE_WEBHOOK = 'https://hook.eu1.make.com/0tm7kehtbdvct8xrl23ktflklm2j9d3q';
+  // Zie onderaan dit bestand voor de Make scenario-instructies
+
   let recording = false;
   let timerInterval;
   let seconds = 0;
+  let mediaRecorder = null;
+  let audioChunks = [];
+  let audioStream = null;
 
   function resetRecorder() {
     recording = false;
     seconds = 0;
+    audioChunks = [];
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+    if (audioStream) audioStream.getTracks().forEach(t => t.stop());
     document.getElementById('recordBtn').classList.remove('recording');
     document.getElementById('timerDisplay').textContent = '0:00';
     document.getElementById('recordStatus').textContent = 'Klik om te beginnen met opnemen';
@@ -1859,8 +1874,29 @@
     clearInterval(timerInterval);
   }
 
-  function toggleRecording() {
+  async function toggleRecording() {
     if (!recording) {
+      // Vraag microfoon toegang
+      try {
+        audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      } catch (err) {
+        showToast('❌ Microfoon toegang geweigerd — check browserinstellingen');
+        console.error('[VisitFlow] Mic error:', err);
+        return;
+      }
+
+      // Kies beste audio formaat (webm heeft voorkeur voor Whisper)
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+        ? 'audio/webm;codecs=opus'
+        : MediaRecorder.isTypeSupported('audio/webm')
+          ? 'audio/webm'
+          : 'audio/ogg;codecs=opus';
+
+      audioChunks = [];
+      mediaRecorder = new MediaRecorder(audioStream, { mimeType });
+      mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+      mediaRecorder.start(250); // chunk elke 250ms
+
       recording = true;
       document.getElementById('recordBtn').classList.add('recording');
       document.getElementById('recordStatus').textContent = '● Opname bezig...';
@@ -1871,6 +1907,7 @@
         const s = seconds % 60;
         document.getElementById('timerDisplay').textContent = m + ':' + (s < 10 ? '0' : '') + s;
       }, 1000);
+
     } else {
       stopAndProcess();
     }
@@ -1879,21 +1916,148 @@
   function stopAndProcess() {
     clearInterval(timerInterval);
     recording = false;
-    document.getElementById('recording-ui').style.display = 'none';
-    document.getElementById('processing-ui').style.display = 'block';
-    // Simulate processing steps
-    setTimeout(() => {
-      document.getElementById('pstep1').className = 'processing-step done';
-      document.getElementById('pstep2').className = 'processing-step active';
-    }, 900);
-    setTimeout(() => {
-      document.getElementById('pstep2').className = 'processing-step done';
-      document.getElementById('pstep3').className = 'processing-step active';
-    }, 1800);
-    setTimeout(() => {
-      document.getElementById('pstep3').className = 'processing-step done';
-      showWizardStep(3);
-    }, 2700);
+
+    // Stop de recorder — wacht op laatste data via onstop
+    mediaRecorder.onstop = async () => {
+      // Stop microfoon
+      if (audioStream) audioStream.getTracks().forEach(t => t.stop());
+
+      // Toon processing UI
+      document.getElementById('recording-ui').style.display = 'none';
+      document.getElementById('processing-ui').style.display = 'block';
+      setProcessingStep(1);
+
+      // Combineer audio chunks → blob → base64
+      const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
+      const base64Audio = await blobToBase64(audioBlob);
+
+      setProcessingStep(2);
+
+      // Stuur naar Make voor Whisper + Claude verwerking
+      try {
+        const bezoekContext = {
+          bedrijf:        document.getElementById('company-name')?.value?.trim() || '',
+          contactpersoon: document.getElementById('contact-name')?.value?.trim() || '',
+          datum:          document.getElementById('visit-date')?.value || '',
+          locatie:        document.getElementById('visit-location')?.value?.trim() || '',
+        };
+
+        const response = await fetch(MAKE_VOICE_WEBHOOK, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            audio_base64: base64Audio,
+            audio_mime:   mediaRecorder.mimeType,
+            bezoek:       bezoekContext,
+            taal:         'nl'
+          })
+        });
+
+        if (!response.ok) throw new Error('Make webhook fout: ' + response.status);
+
+        const result = await response.json();
+        setProcessingStep(3);
+
+        // Vul transcript en velden in vanuit Make/Claude response
+        setTimeout(() => {
+          vulVeldenIn(result);
+          showWizardStep(3);
+        }, 600);
+
+      } catch (err) {
+        console.error('[VisitFlow] Voice verwerking mislukt:', err);
+        showToast('⚠️ Verwerking mislukt — controleer Make webhook URL');
+        // Fallback: ga toch naar stap 3 zodat gebruiker handmatig kan invullen
+        setProcessingStep(3);
+        setTimeout(() => showWizardStep(3), 800);
+      }
+    };
+
+    if (mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+  }
+
+  // Zet processing stap visueel
+  function setProcessingStep(step) {
+    ['pstep1','pstep2','pstep3'].forEach((id, i) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (i + 1 < step)       el.className = 'processing-step done';
+      else if (i + 1 === step) el.className = 'processing-step active';
+      else                     el.className = 'processing-step';
+    });
+  }
+
+  // Converteer Blob naar base64 string
+  function blobToBase64(blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result.split(',')[1]); // strip data:...;base64,
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  // Vul stap 3 velden in vanuit Make/Claude JSON response
+  // Make moet een JSON object terugsturen met onderstaande veldnamen
+  // Zie Make scenario-instructies onderaan dit bestand
+  function vulVeldenIn(data) {
+    // Transcript
+    const transcriptEl = document.getElementById('transcript-text');
+    if (transcriptEl && data.transcript) transcriptEl.textContent = data.transcript;
+
+    // Helper — veilig een veld invullen
+    const set = (id, val) => {
+      if (!val && val !== 0) return;
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (el.tagName === 'SELECT') {
+        // Zoek meest overeenkomende optie (case-insensitive)
+        const lower = String(val).toLowerCase();
+        const opt = Array.from(el.options).find(o => o.value.toLowerCase() === lower || o.text.toLowerCase() === lower);
+        if (opt) el.value = opt.value;
+      } else if (el.type === 'checkbox') {
+        el.checked = (val === true || val === 'ja' || val === 1);
+      } else {
+        el.value = val;
+      }
+    };
+
+    // Stap 3 — Needs input
+    set('rv-criteria-besluit',    data.criteria_besluitvorming);
+    set('rv-autoregeling-aanwezig', data.autoregeling_aanwezig);
+    set('rv-schadeherstel',       data.vaste_partners_schadeherstel);
+    set('rv-brandstof-mix',       data.brandstof_hybride_elektrisch);
+
+    // Branche & Bedrijf
+    set('rv-vestigingen',  data.aantal_vestigingen);
+    set('rv-medewerkers',  data.aantal_medewerkers);
+
+    // Besluitvorming
+    set('rv-rol-contact',       data.rol_contactpersoon);
+    set('rv-beslisser',         data.beslisser_wagenpark);
+    set('rv-invloed-berijder',  data.invloed_berijder);
+
+    // Wagenpark
+    set('rv-pw-aantal',    data.aantal_personenwagens);
+    set('rv-merken',       data.primaire_merken);
+    set('rv-koop-lease',   data.koop_of_lease);
+    set('rv-bw-aantal',    data.aantal_bedrijfswagens);
+    set('rv-laadpalen',    data.aantal_laadpalen);
+    set('rv-beheertool',   data.wagenpark_beheertool);
+
+    // Autoregeling
+    set('rv-voorstel',     data.voorstel_nav_scan);
+    set('rv-criteria-pw',  data.criteria_nieuwe_pw);
+
+    // Volgende actie
+    set('rv-plan-afspraak',    data.plan_nieuwe_afspraak);
+    set('rv-volgende-datum',   data.volgende_afspraak_datum);
+    set('rv-notities',         data.notities);
+    set('rv-opmerkingen',      data.opmerkingen);
+
+    // Toon badge hoeveel velden ingevuld zijn
+    const ingevuld = Object.values(data).filter(v => v && v !== '').length;
+    showToast(`✅ ${ingevuld} velden automatisch ingevuld door AI`);
   }
 
   // Review
@@ -1916,11 +2080,6 @@
   // Actions
   function toggleAction(card) {
     card.classList.toggle('selected');
-  }
-
-  function finishVisit() {
-    showPage('dashboard');
-    setTimeout(() => showToast('✅ Bezoek afgerond! Acties toegevoegd aan dashboard.'), 300);
   }
 
   // Tasks
@@ -2452,42 +2611,164 @@
     });
   });
   <script>
-// Deze functie verstuurt de data naar Make.com
-async function sendToMake(data) {
-    const webhookUrl = 'https://hook.eu1.make.com/m9mcr6ovma4jkb1hti7mcrb1m66nhn17'; // VERVANG DIT DOOR JE URL
+  // ── VISITFLOW → MAKE.COM WEBHOOK ──────────────────────────────────────────
+  //
+  // MAKE SCENARIO — VOICE VERWERKING (aparte webhook van de data webhook)
+  // ─────────────────────────────────────────────────────────────────────────
+  // MODULE 1: Webhook — ontvangt { audio_base64, audio_mime, bezoek, taal }
+  //
+  // MODULE 2: Tools → Base64 Decode
+  //   Input: {{1.audio_base64}}
+  //   Output: binary audio bestand
+  //
+  // MODULE 3: HTTP → Make a request (Whisper)
+  //   URL: https://api.openai.com/v1/audio/transcriptions
+  //   Method: POST
+  //   Headers: Authorization: Bearer {{jouw_openai_key}}
+  //   Body type: multipart/form-data
+  //   Fields:
+  //     file: {{2.data}} (binary), filename: audio.webm
+  //     model: whisper-1
+  //     language: {{1.taal}}
+  //   Output: { text: "transcript tekst..." }
+  //
+  // MODULE 4: HTTP → Make a request (Claude)
+  //   URL: https://api.anthropic.com/v1/messages
+  //   Method: POST
+  //   Headers:
+  //     x-api-key: {{jouw_anthropic_key}}
+  //     anthropic-version: 2023-06-01
+  //     content-type: application/json
+  //   Body (JSON):
+  //   {
+  //     "model": "claude-opus-4-6",
+  //     "max_tokens": 1024,
+  //     "messages": [{
+  //       "role": "user",
+  //       "content": "Je bent een automotive sales assistent. Analyseer dit bezoekverslag en extraheer de gevraagde velden als JSON.\n\nBezoek context:\n- Bedrijf: {{1.bezoek.bedrijf}}\n- Contact: {{1.bezoek.contactpersoon}}\n\nTranscript:\n{{3.text}}\n\nGeef ALLEEN een JSON object terug met deze velden (gebruik null als niet vermeld):\n{\n  \"transcript\": \"volledige transcript tekst\",\n  \"criteria_besluitvorming\": \"\",\n  \"autoregeling_aanwezig\": \"ja/nee\",\n  \"vaste_partners_schadeherstel\": \"ja/nee\",\n  \"brandstof_hybride_elektrisch\": \"\",\n  \"aantal_vestigingen\": null,\n  \"aantal_medewerkers\": null,\n  \"rol_contactpersoon\": \"beslisser/beïnvloeder\",\n  \"beslisser_wagenpark\": \"\",\n  \"invloed_berijder\": \"enige/geen/alle\",\n  \"aantal_personenwagens\": null,\n  \"primaire_merken\": \"\",\n  \"koop_of_lease\": \"lease/koop\",\n  \"aantal_bedrijfswagens\": null,\n  \"aantal_laadpalen\": null,\n  \"wagenpark_beheertool\": \"\",\n  \"voorstel_nav_scan\": \"ja/nee\",\n  \"criteria_nieuwe_pw\": \"\",\n  \"plan_nieuwe_afspraak\": \"ja/nee\",\n  \"volgende_afspraak_datum\": \"\",\n  \"notities\": \"\",\n  \"opmerkingen\": \"\"\n}"
+  //     }]
+  //   }
+  //
+  // MODULE 5: JSON → Parse JSON
+  //   Input: {{4.content[].text}} (haal de tekst uit Claude response)
+  //
+  // MODULE 6: Webhook Response
+  //   Body: {{5}} (het geparsede JSON object)
+  //   Status: 200
+  //   Content-Type: application/json
+  //
+  // BELANGRIJK: Zet de webhook op "Wait for response" zodat de browser
+  // het resultaat ontvangt. Dit heet "synchronous webhook" in Make.
+  // ─────────────────────────────────────────────────────────────────────────
+  const MAKE_WEBHOOK_URL = 'https://hook.eu1.make.com/m9mcr6ovma4jkb1hti7mcrb1m66nhn17';
 
+  // Verstuur JSON naar Make.com webhook
+  async function sendToMake(data) {
     try {
-        const response = await fetch('https://hook.eu1.make.com/m9mcr6ovma4jkb1hti7mcrb1m66nhn17', {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data)
-        });
-
-        if (response.ok) {
-            alert("Data succesvol verzonden naar Make!");
-        } else {
-            alert("Er ging iets mis bij het verzenden.");
-        }
+      const response = await fetch(MAKE_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (response.ok) {
+        showToast('✅ Bezoekdata verzonden naar Make.com');
+        console.log('[VisitFlow] Make.com webhook OK:', data);
+      } else {
+        showToast('⚠️ Make.com fout: ' + response.status);
+        console.warn('[VisitFlow] Make.com response:', response.status);
+      }
     } catch (error) {
-        console.error("Fout:", error);
-        alert("Kan geen verbinding maken met Make.com");
+      showToast('❌ Kan Make.com niet bereiken — check CORS / netwerk');
+      console.error('[VisitFlow] Webhook fout:', error);
     }
-}
+  }
 
-// Voorbeeld: Koppel dit aan je 'Save' of 'Verzend' knop
-// Je moet later in je HTML nog id="save-btn" toevoegen aan je knop
-document.addEventListener('DOMContentLoaded', () => {
-    const saveBtn = document.querySelector('.btn-primary'); // Pakt de blauwe knop
-    if (saveBtn) {
-        saveBtn.addEventListener('click', () => {
-            const testData = {
-                titel: "Nieuw Bezoek",
-                datum: new Date().toISOString(),
-                status: "Concept"
-            };
-            sendToMake(testData);
-        });
-    }
-});
-</script>
-</script></body></html>
+  // Lees alle geselecteerde actie-cards uit
+  function getGeselecteerdeActies() {
+    const actieCards = document.querySelectorAll('.action-card.selected');
+    return Array.from(actieCards)
+      .map(card => card.getAttribute('data-action'))
+      .filter(Boolean);
+  }
+
+  // Lees geselecteerde ontvangers/formaten uit stap 4
+  function getVerzendConfig() {
+    return {
+      formaten: Array.from(document.querySelectorAll('#format-options .format-chip.selected'))
+                     .map(c => c.textContent.trim()),
+      klant_geselecteerd:    document.getElementById('check-send-client')?.classList.contains('checked') || false,
+      team_geselecteerd:     document.getElementById('check-send-team')?.classList.contains('checked') || false,
+      archief_geselecteerd:  document.getElementById('check-send-self')?.classList.contains('checked') || false,
+      crm_geselecteerd:      document.getElementById('check-send-crm')?.classList.contains('checked') || false,
+      whatsapp_geselecteerd: document.getElementById('check-send-whatsapp')?.classList.contains('checked') || false,
+    };
+  }
+
+  // Centrale functie — verzamelt ALLE data uit de volledige wizard
+  function collectVisitData() {
+    return {
+      // ── META ──────────────────────────────────────────────────────────────
+      bron:        'VisitFlow',
+      tijdstempel:  new Date().toISOString(),
+      status:      'Afgerond',
+
+      // ── STAP 1 — BEZOEKGEGEVENS ───────────────────────────────────────────
+      bedrijf:           document.getElementById('company-name')?.value?.trim()    || '',
+      contactpersoon:    document.getElementById('contact-name')?.value?.trim()    || '',
+      datum:             document.getElementById('visit-date')?.value              || '',
+      locatie:           document.getElementById('visit-location')?.value?.trim()  || '',
+      extra_aanwezigen:  document.getElementById('attendees')?.value?.trim()       || '',
+
+      // ── STAP 2/3 — TRANSCRIPT ─────────────────────────────────────────────
+      transcript: document.getElementById('transcript-text')?.textContent?.trim() || '',
+
+      // ── STAP 3 — REVIEW: NEEDS INPUT ─────────────────────────────────────
+      criteria_besluitvorming:        document.getElementById('rv-criteria-besluit')?.value?.trim()   || '',
+      autoregeling_aanwezig:          document.getElementById('rv-autoregeling-aanwezig')?.value      || '',
+      vaste_partners_schadeherstel:   document.getElementById('rv-schadeherstel')?.value              || '',
+      brandstof_hybride_elektrisch:   document.getElementById('rv-brandstof-mix')?.value?.trim()      || '',
+
+      // ── STAP 3 — REVIEW: BRANCHE & BEDRIJF ───────────────────────────────
+      aantal_vestigingen: document.getElementById('rv-vestigingen')?.value  || '',
+      aantal_medewerkers: document.getElementById('rv-medewerkers')?.value  || '',
+
+      // ── STAP 3 — REVIEW: BESLUITVORMING ──────────────────────────────────
+      rol_contactpersoon:          document.getElementById('rv-rol-contact')?.value       || '',
+      beslisser_wagenpark:         document.getElementById('rv-beslisser')?.value?.trim() || '',
+      invloed_berijder:            document.getElementById('rv-invloed-berijder')?.value  || '',
+
+      // ── STAP 3 — REVIEW: WAGENPARK OVERZICHT ─────────────────────────────
+      aantal_personenwagens:   document.getElementById('rv-pw-aantal')?.value    || '',
+      primaire_merken:         document.getElementById('rv-merken')?.value?.trim() || '',
+      koop_of_lease:           document.getElementById('rv-koop-lease')?.value    || '',
+      aantal_bedrijfswagens:   document.getElementById('rv-bw-aantal')?.value     || '',
+      aantal_laadpalen:        document.getElementById('rv-laadpalen')?.value     || '',
+      wagenpark_beheertool:    document.getElementById('rv-beheertool')?.value?.trim() || '',
+
+      // ── STAP 3 — REVIEW: AUTOREGELING ────────────────────────────────────
+      voorstel_nav_scan:         document.getElementById('rv-voorstel')?.value           || '',
+      criteria_nieuwe_pw:        document.getElementById('rv-criteria-pw')?.value?.trim() || '',
+
+      // ── STAP 3 — REVIEW: VOLGENDE ACTIE ──────────────────────────────────
+      plan_nieuwe_afspraak: document.getElementById('rv-plan-afspraak')?.checked ? 'ja' : 'nee',
+      volgende_afspraak_datum: document.getElementById('rv-volgende-datum')?.value  || '',
+      notities:                document.getElementById('rv-notities')?.value?.trim() || '',
+      opmerkingen:             document.getElementById('rv-opmerkingen')?.value?.trim() || '',
+
+      // ── STAP 4 — GESELECTEERDE ACTIES ─────────────────────────────────────
+      geselecteerde_acties: getGeselecteerdeActies(),
+
+      // ── STAP 4 — VERZEND CONFIG ───────────────────────────────────────────
+      verzend_config: getVerzendConfig(),
+    };
+  }
+
+  // Override finishVisit — stuurt data naar Make en rondt bezoek af
+  function finishVisit() {
+    const data = collectVisitData();
+    sendToMake(data);
+    showPage('dashboard');
+    setTimeout(() => showToast('✅ Bezoek afgerond! Data verzonden naar Make.com'), 300);
+  }
+  </script>
+</body></html>
