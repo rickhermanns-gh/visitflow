@@ -2451,4 +2451,43 @@
       if (window.innerWidth < 768) closeSidebar();
     });
   });
+  <script>
+// Deze functie verstuurt de data naar Make.com
+async function sendToMake(data) {
+    const webhookUrl = "https://hook.eu1.make.com/m9mcr6ovma4jkb1hti7mcrb1m66nhn17"; // VERVANG DIT DOOR JE URL
+
+    try {
+        const response = await fetch(webhookUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+            alert("Data succesvol verzonden naar Make!");
+        } else {
+            alert("Er ging iets mis bij het verzenden.");
+        }
+    } catch (error) {
+        console.error("Fout:", error);
+        alert("Kan geen verbinding maken met Make.com");
+    }
+}
+
+// Voorbeeld: Koppel dit aan je 'Save' of 'Verzend' knop
+// Je moet later in je HTML nog id="save-btn" toevoegen aan je knop
+document.addEventListener('DOMContentLoaded', () => {
+    const saveBtn = document.querySelector('.btn-primary'); // Pakt de blauwe knop
+    if (saveBtn) {
+        saveBtn.addEventListener('click', () => {
+            const testData = {
+                titel: "Nieuw Bezoek",
+                datum: new Date().toISOString(),
+                status: "Concept"
+            };
+            sendToMake(testData);
+        });
+    }
+});
+</script>
 </script></body></html>
