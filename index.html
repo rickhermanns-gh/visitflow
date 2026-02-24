@@ -1842,7 +1842,199 @@
     card.classList.toggle('selected');
   }
 
-  // ── VOICE VERWERKING — MediaRecorder → Make → Whisper → Claude ──────────
+  // ── VOICE VERWERKING — Web Speech API (browser) → Make → Claude ──────────
+  // Stap 1: Browser transcribeert audio live via Web Speech API (gratis, geen upload)
+  // Stap 2: Tekst wordt naar Make webhook gestuurd
+  // Stap 3: Make stuurt naar Claude voor veldextractie (JSON)
+  // Stap 4: Make stuurt JSON terug → app vult stap 3 automatisch in
+  //
+  const MAKE_VOICE_WEBHOOK = 'https://hook.eu1.make.com/0tm7kehtbdvct8xrl23ktflklm2j9d3q';
+
+  let recording = false;
+  let timerInterval;
+  let seconds = 0;
+  let recognition = null;
+  let finalTranscript = '';
+
+  function resetRecorder() {
+    recording = false;
+    seconds = 0;
+    finalTranscript = '';
+    if (recognition) recognition.stop();
+    document.getElementById('recordBtn').classList.remove('recording');
+    document.getElementById('timerDisplay').textContent = '0:00';
+    document.getElementById('recordStatus').textContent = 'Klik om te beginnen met opnemen';
+    document.getElementById('stopBtn').style.display = 'none';
+    document.getElementById('recording-ui').style.display = 'block';
+    document.getElementById('processing-ui').style.display = 'none';
+    clearInterval(timerInterval);
+  }
+
+  function toggleRecording() {
+    if (!recording) {
+      // Check Web Speech API beschikbaarheid
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        showToast('❌ Web Speech API niet beschikbaar in deze browser — gebruik Chrome');
+        return;
+      }
+
+      recognition = new SpeechRecognition();
+      recognition.lang = 'nl-NL';
+      recognition.continuous = true;
+      recognition.interimResults = true;
+
+      finalTranscript = '';
+
+      recognition.onresult = (event) => {
+        let interim = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const t = event.results[i][0].transcript;
+          if (event.results[i].isFinal) finalTranscript += t + ' ';
+          else interim += t;
+        }
+        // Toon live transcript feedback
+        document.getElementById('recordStatus').textContent = '● ' + (finalTranscript + interim).slice(-80) + '...';
+      };
+
+      recognition.onerror = (event) => {
+        console.error('[VisitFlow] Speech error:', event.error);
+        if (event.error === 'not-allowed') {
+          showToast('❌ Microfoon toegang geweigerd — check browserinstellingen');
+        }
+      };
+
+      recognition.start();
+      recording = true;
+      document.getElementById('recordBtn').classList.add('recording');
+      document.getElementById('stopBtn').style.display = 'inline-flex';
+
+      timerInterval = setInterval(() => {
+        seconds++;
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        document.getElementById('timerDisplay').textContent = m + ':' + (s < 10 ? '0' : '') + s;
+      }, 1000);
+
+    } else {
+      stopAndProcess();
+    }
+  }
+
+  function stopAndProcess() {
+    clearInterval(timerInterval);
+    recording = false;
+    if (recognition) recognition.stop();
+
+    document.getElementById('recording-ui').style.display = 'none';
+    document.getElementById('processing-ui').style.display = 'block';
+    setProcessingStep(1);
+
+    // Kleine vertraging zodat laatste woorden worden verwerkt
+    setTimeout(async () => {
+      const transcript = finalTranscript.trim();
+
+      if (!transcript) {
+        showToast('⚠️ Geen spraak herkend — probeer opnieuw');
+        resetRecorder();
+        return;
+      }
+
+      setProcessingStep(2);
+
+      const bezoekContext = {
+        bedrijf:        document.getElementById('company-name')?.value?.trim() || '',
+        contactpersoon: document.getElementById('contact-name')?.value?.trim() || '',
+        datum:          document.getElementById('visit-date')?.value || '',
+        locatie:        document.getElementById('visit-location')?.value?.trim() || '',
+      };
+
+      try {
+        const response = await fetch(MAKE_VOICE_WEBHOOK, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            transcript: transcript,
+            bezoek:     bezoekContext
+          })
+        });
+
+        if (!response.ok) throw new Error('Make webhook fout: ' + response.status);
+
+        const result = await response.json();
+        setProcessingStep(3);
+
+        setTimeout(() => {
+          vulVeldenIn(result);
+          showWizardStep(3);
+        }, 600);
+
+      } catch (err) {
+        console.error('[VisitFlow] Voice verwerking mislukt:', err);
+        showToast('⚠️ Verwerking mislukt — ga naar stap 3 om handmatig in te vullen');
+        setProcessingStep(3);
+        // Zet transcript alvast in het veld
+        const el = document.getElementById('transcript-text');
+        if (el) el.textContent = transcript;
+        setTimeout(() => showWizardStep(3), 800);
+      }
+    }, 800);
+  }
+
+  function setProcessingStep(step) {
+    ['pstep1','pstep2','pstep3'].forEach((id, i) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (i + 1 < step)        el.className = 'processing-step done';
+      else if (i + 1 === step) el.className = 'processing-step active';
+      else                     el.className = 'processing-step';
+    });
+  }
+
+  function vulVeldenIn(data) {
+    const transcriptEl = document.getElementById('transcript-text');
+    if (transcriptEl && data.transcript) transcriptEl.textContent = data.transcript;
+
+    const set = (id, val) => {
+      if (val === null || val === undefined || val === '') return;
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (el.tagName === 'SELECT') {
+        const lower = String(val).toLowerCase();
+        const opt = Array.from(el.options).find(o => o.value.toLowerCase() === lower || o.text.toLowerCase() === lower);
+        if (opt) el.value = opt.value;
+      } else if (el.type === 'checkbox') {
+        el.checked = (val === true || val === 'ja' || val === 1);
+      } else {
+        el.value = val;
+      }
+    };
+
+    set('rv-criteria-besluit',      data.criteria_besluitvorming);
+    set('rv-autoregeling-aanwezig', data.autoregeling_aanwezig);
+    set('rv-schadeherstel',         data.vaste_partners_schadeherstel);
+    set('rv-brandstof-mix',         data.brandstof_hybride_elektrisch);
+    set('rv-vestigingen',           data.aantal_vestigingen);
+    set('rv-medewerkers',           data.aantal_medewerkers);
+    set('rv-rol-contact',           data.rol_contactpersoon);
+    set('rv-beslisser',             data.beslisser_wagenpark);
+    set('rv-invloed-berijder',      data.invloed_berijder);
+    set('rv-pw-aantal',             data.aantal_personenwagens);
+    set('rv-merken',                data.primaire_merken);
+    set('rv-koop-lease',            data.koop_of_lease);
+    set('rv-bw-aantal',             data.aantal_bedrijfswagens);
+    set('rv-laadpalen',             data.aantal_laadpalen);
+    set('rv-beheertool',            data.wagenpark_beheertool);
+    set('rv-voorstel',              data.voorstel_nav_scan);
+    set('rv-criteria-pw',           data.criteria_nieuwe_pw);
+    set('rv-plan-afspraak',         data.plan_nieuwe_afspraak);
+    set('rv-volgende-datum',        data.volgende_afspraak_datum);
+    set('rv-notities',              data.notities);
+    set('rv-opmerkingen',           data.opmerkingen);
+
+    const ingevuld = Object.values(data).filter(v => v !== null && v !== '' && v !== undefined).length;
+    showToast(`✅ ${ingevuld} velden automatisch ingevuld door AI`);
+  }
   // Stap 1: Browser neemt op via MediaRecorder
   // Stap 2: Audio wordt als base64 naar Make webhook gestuurd
   // Stap 3: Make stuurt naar Whisper (transcriptie) → Claude (velden invullen)
