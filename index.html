@@ -1879,6 +1879,18 @@
         return;
       }
 
+      // Reset alle stap 3 velden voor nieuwe opname
+      const resetIds = ['rv-criteria-besluit','rv-autoregeling-aanwezig','rv-schadeherstel','rv-brandstof-mix','rv-vestigingen','rv-medewerkers','rv-rol-contact','rv-beslisser','rv-invloed-berijder','rv-pw-aantal','rv-merken','rv-koop-lease','rv-bw-aantal','rv-laadpalen','rv-beheertool','rv-voorstel','rv-criteria-pw','rv-volgende-datum','rv-notities','rv-opmerkingen'];
+      resetIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (el.tagName === 'SELECT') el.selectedIndex = 0;
+        else if (el.type === 'checkbox') el.checked = false;
+        else el.value = '';
+      });
+      const transcriptEl = document.getElementById('transcript-text');
+      if (transcriptEl) transcriptEl.textContent = '';
+
       recognition = new SpeechRecognition();
       recognition.lang = 'nl-NL';
       recognition.continuous = true;
